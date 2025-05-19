@@ -18,6 +18,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import cdist
 
+from torch.utils.data import DataLoader, Dataset
+
 from . import env, util
 from .metrics import calculate_metrics as calculate_metrics_
 from .util import TaskType, load_json
@@ -568,6 +570,9 @@ class FastTensorDataLoader:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
+        # Customizations for dp setting with Opacus:
+        self.dataset = [[tensors[0][i], tensors[1][i]] for i in range(len(tensors[0]))]
+
         # Calculate # batches
         n_batches, remainder = divmod(self.dataset_len, self.batch_size)
         if remainder > 0:
@@ -588,7 +593,8 @@ class FastTensorDataLoader:
         return batch
 
     def __len__(self):
-        return self.n_batches
+        return self.n_batchesz
+        # return len(self.dataset)
 
 def prepare_fast_dataloader(
     D : Dataset,
@@ -606,6 +612,61 @@ def prepare_fast_dataloader(
     dataloader = FastTensorDataLoader(X, y, batch_size=batch_size, shuffle=(split=='train'))
     while True:
         yield from dataloader
+
+def prepare_dp_dataloader(
+    D : Dataset,
+    split : str,
+    batch_size: int
+):
+    if D.X_cat is not None:
+        if D.X_num is not None:
+            X = torch.from_numpy(np.concatenate([D.X_num[split], D.X_cat[split]], axis=1)).float()
+        else:
+            X = torch.from_numpy(D.X_cat[split]).float()
+    else:
+        X = torch.from_numpy(D.X_num[split]).float()
+    y = torch.from_numpy(D.y[split])
+    data = [[X[i], y[i]] for i in range(len(X))]
+    train_loader = torch.utils.data.DataLoader(dataset=data, shuffle=True, batch_size=batch_size)
+    return train_loader
+
+
+class FastTensorDataset(Dataset):
+    """
+    A simple Dataset wrapper for efficient tensor access.
+    Required by Opacus to ensure compatibility with PrivacyEngine.
+    """
+
+    def __init__(self, *tensors):
+        assert all(t.shape[0] == tensors[0].shape[0] for t in tensors)
+        self.tensors = tensors
+
+    def __getitem__(self, index):
+        return tuple(tensor[index] for tensor in self.tensors)
+
+    def __len__(self):
+        return self.tensors[0].shape[0]
+
+def prepare_fast_dp_dataloader(
+        D: Dataset,
+        split: str,
+        batch_size: int
+):
+    if D.X_cat is not None:
+        if D.X_num is not None:
+            X = torch.from_numpy(np.concatenate([D.X_num[split], D.X_cat[split]], axis=1)).float()
+        else:
+            X = torch.from_numpy(D.X_cat[split]).float()
+    else:
+        X = torch.from_numpy(D.X_num[split]).float()
+    y = torch.from_numpy(D.y[split])
+
+    # Wrap tensors into a FastTensorDataset
+    dataset = FastTensorDataset(X, y)
+
+    # Create a DataLoader (which is compatible with Opacus)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=(split == 'train'))
+    return dataloader
 
 def prepare_fast_torch_dataloader(
     D : Dataset,

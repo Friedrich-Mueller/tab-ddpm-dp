@@ -19,4 +19,17 @@ tqdm==4.62.3
 imbalanced-learn==0.7.0
 
 # tvae
-rdt==0.6.4 
+rdt==0.6.4
+
+# opacus for DP
+ -e git+https://github.com/timudk/opacus_dpdm.git@dpdm#egg=opacus
+#-e git+https://github.com/pytorch/opacus.git#egg=opacus
+
+# For (utility) evaluation
+xgboost==1.7.6
+
+# For testing of evaluation
+# tensorflow==v1.14.0
+
+# For running DCR+NNDR privacy evaluation
+intel-openmp==v2023.1.0

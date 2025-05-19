@@ -3,6 +3,9 @@ import shutil
 import os
 import argparse
 from train import train
+from train_dp import train_dp
+from train_dp_old import train_dp_old
+from train_dp_man import train_dp_man
 from sample import sample
 from eval_catboost import train_catboost
 from eval_mlp import train_mlp
@@ -29,6 +32,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', metavar='FILE')
     parser.add_argument('--train', action='store_true', default=False)
+    parser.add_argument('--train_dp', action='store_true', default=False)
+    parser.add_argument('--train_dp_old', action='store_true', default=False)
+    parser.add_argument('--train_dp_man', action='store_true', default=False)
     parser.add_argument('--sample', action='store_true',  default=False)
     parser.add_argument('--eval', action='store_true',  default=False)
     parser.add_argument('--change_val', action='store_true',  default=False)
@@ -57,7 +63,47 @@ def main():
             device=device,
             change_val=args.change_val
         )
+    if args.train_dp:
+        train_dp(
+            **raw_config['train']['main'],
+            **raw_config['diffusion_params'],
+            parent_dir=raw_config['parent_dir'],
+            real_data_path=raw_config['real_data_path'],
+            model_type=raw_config['model_type'],
+            model_params=raw_config['model_params'],
+            T_dict=raw_config['train']['T'],
+            num_numerical_features=raw_config['num_numerical_features'],
+            device=device,
+            change_val=args.change_val
+        )
+    if args.train_dp_old:
+        train_dp_old(
+            **raw_config['train']['main'],
+            **raw_config['diffusion_params'],
+            parent_dir=raw_config['parent_dir'],
+            real_data_path=raw_config['real_data_path'],
+            model_type=raw_config['model_type'],
+            model_params=raw_config['model_params'],
+            T_dict=raw_config['train']['T'],
+            num_numerical_features=raw_config['num_numerical_features'],
+            device=device,
+            change_val=args.change_val
+        )
+    if args.train_dp_man:
+        train_dp_man(
+            **raw_config['train']['main'],
+            **raw_config['diffusion_params'],
+            parent_dir=raw_config['parent_dir'],
+            real_data_path=raw_config['real_data_path'],
+            model_type=raw_config['model_type'],
+            model_params=raw_config['model_params'],
+            T_dict=raw_config['train']['T'],
+            num_numerical_features=raw_config['num_numerical_features'],
+            device=device,
+            change_val=args.change_val
+        )
     if args.sample:
+        print("Calling pipeline.py sample")
         sample(
             num_samples=raw_config['sample']['num_samples'],
             batch_size=raw_config['sample']['batch_size'],

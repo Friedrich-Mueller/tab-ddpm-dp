@@ -8,6 +8,8 @@ from utils_train import get_model, make_dataset, update_ema
 import lib
 import pandas as pd
 
+
+
 class Trainer:
     def __init__(self, diffusion, train_iter, lr, weight_decay, steps, device=torch.device('cuda:1')):
         self.diffusion = diffusion
@@ -36,6 +38,8 @@ class Trainer:
         for k in out_dict:
             out_dict[k] = out_dict[k].long().to(self.device)
         self.optimizer.zero_grad()
+
+
         loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
         loss = loss_multi + loss_gauss
         loss.backward()
@@ -50,16 +54,23 @@ class Trainer:
 
         curr_count = 0
         while step < self.steps:
+
+            # Get the next batch of data
             x, out_dict = next(self.train_iter)
             out_dict = {'y': out_dict}
+
+            # Run a training step
             batch_loss_multi, batch_loss_gauss = self._run_step(x, out_dict)
 
+            # Anneal learning rate as per your schedule
             self._anneal_lr(step)
 
+            # Update current batch statistics
             curr_count += len(x)
             curr_loss_multi += batch_loss_multi.item() * len(x)
             curr_loss_gauss += batch_loss_gauss.item() * len(x)
 
+            # Logging after every log_every steps
             if (step + 1) % self.log_every == 0:
                 mloss = np.around(curr_loss_multi / curr_count, 4)
                 gloss = np.around(curr_loss_gauss / curr_count, 4)
