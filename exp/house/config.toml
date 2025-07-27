@@ -25,8 +25,11 @@ scheduler = "cosine"
 [train.main]
 steps = 1000
 lr = 0.001
+lr_anneal = "cosine"
 weight_decay = 1e-05
-batch_size = 4096
+batch_size = 256
+max_grad_norm = 0.4
+noise_multiplicity = 1
 
 [train.T]
 seed = 0
@@ -38,8 +41,8 @@ cat_encoding = "__none__"
 y_policy = "default"
 
 [sample]
-num_samples = 116000
-batch_size = 30000
+num_samples = 3096
+batch_size = 10000
 seed = 0
 
 [eval.type]

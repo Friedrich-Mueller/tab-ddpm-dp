@@ -7,7 +7,7 @@ from tab_ddpm import GaussianMultinomialDiffusion
 from utils_train import get_model, make_dataset, update_ema
 import lib
 import pandas as pd
-
+import math
 
 
 class Trainer:
@@ -23,15 +23,33 @@ class Trainer:
         self.optimizer = torch.optim.AdamW(self.diffusion.parameters(), lr=lr, weight_decay=weight_decay)
         self.device = device
         self.loss_history = pd.DataFrame(columns=['step', 'mloss', 'gloss', 'loss'])
-        self.log_every = 100
-        self.print_every = 500
+        self.log_every = 10
+        self.print_every = 50
         self.ema_every = 1000
+
+    # def _anneal_lr(self, step):
+    #     frac_done = step / self.steps
+    #     lr = self.init_lr * (1 - frac_done)
+    #     for param_group in self.optimizer.param_groups:
+    #         param_group["lr"] = lr
 
     def _anneal_lr(self, step):
         frac_done = step / self.steps
-        lr = self.init_lr * (1 - frac_done)
+        lr = self.init_lr * 0.5 * (1 + math.cos(math.pi * frac_done))
         for param_group in self.optimizer.param_groups:
             param_group["lr"] = lr
+
+    # def _run_step(self, x, out_dict):
+    #     x = x.to(self.device)
+    #     for k in out_dict:
+    #         out_dict[k] = out_dict[k].long().to(self.device)
+    #     self.optimizer.zero_grad()
+    #     loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+    #     loss = loss_multi + loss_gauss
+    #     loss.backward()
+    #     self.optimizer.step()
+    #
+    #     return loss_multi, loss_gauss
 
     def _run_step(self, x, out_dict):
         x = x.to(self.device)
@@ -39,9 +57,17 @@ class Trainer:
             out_dict[k] = out_dict[k].long().to(self.device)
         self.optimizer.zero_grad()
 
+        # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+        total_loss_multi = 0.0
+        total_loss_gauss = 0.0
+        for i in range(8):
+            # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+            loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+            total_loss_multi += loss_multi
+            total_loss_gauss += loss_gauss
+        loss = (total_loss_multi / 8) + (total_loss_gauss / 9)
 
-        loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-        loss = loss_multi + loss_gauss
+        # loss = loss_multi + loss_gauss
         loss.backward()
         self.optimizer.step()
 
@@ -54,29 +80,22 @@ class Trainer:
 
         curr_count = 0
         while step < self.steps:
-
-            # Get the next batch of data
             x, out_dict = next(self.train_iter)
             out_dict = {'y': out_dict}
-
-            # Run a training step
             batch_loss_multi, batch_loss_gauss = self._run_step(x, out_dict)
 
-            # Anneal learning rate as per your schedule
             self._anneal_lr(step)
 
-            # Update current batch statistics
             curr_count += len(x)
             curr_loss_multi += batch_loss_multi.item() * len(x)
             curr_loss_gauss += batch_loss_gauss.item() * len(x)
 
-            # Logging after every log_every steps
             if (step + 1) % self.log_every == 0:
                 mloss = np.around(curr_loss_multi / curr_count, 4)
                 gloss = np.around(curr_loss_gauss / curr_count, 4)
                 if (step + 1) % self.print_every == 0:
                     print(f'Step {(step + 1)}/{self.steps} MLoss: {mloss} GLoss: {gloss} Sum: {mloss + gloss}')
-                self.loss_history.loc[len(self.loss_history)] =[step + 1, mloss, gloss, mloss + gloss]
+                self.loss_history.loc[len(self.loss_history)] = [step + 1, mloss, gloss, mloss + gloss]
                 curr_count = 0
                 curr_loss_gauss = 0.0
                 curr_loss_multi = 0.0
@@ -85,23 +104,24 @@ class Trainer:
 
             step += 1
 
+
 def train(
-    parent_dir,
-    real_data_path = 'data/higgs-small',
-    steps = 1000,
-    lr = 0.002,
-    weight_decay = 1e-4,
-    batch_size = 1024,
-    model_type = 'mlp',
-    model_params = None,
-    num_timesteps = 1000,
-    gaussian_loss_type = 'mse',
-    scheduler = 'cosine',
-    T_dict = None,
-    num_numerical_features = 0,
-    device = torch.device('cuda:1'),
-    seed = 0,
-    change_val = False
+        parent_dir,
+        real_data_path='data/higgs-small',
+        steps=1000,
+        lr=0.002,
+        weight_decay=1e-4,
+        batch_size=1024,
+        model_type='mlp',
+        model_params=None,
+        num_timesteps=1000,
+        gaussian_loss_type='mse',
+        scheduler='cosine',
+        T_dict=None,
+        num_numerical_features=0,
+        device=torch.device('cuda:1'),
+        seed=0,
+        change_val=False
 ):
     real_data_path = os.path.normpath(real_data_path)
     parent_dir = os.path.normpath(parent_dir)
@@ -127,7 +147,7 @@ def train(
     d_in = np.sum(K) + num_numerical_features
     model_params['d_in'] = d_in
     print(d_in)
-    
+
     print(model_params)
     model = get_model(
         model_type,
@@ -139,8 +159,6 @@ def train(
 
     # train_loader = lib.prepare_beton_loader(dataset, split='train', batch_size=batch_size)
     train_loader = lib.prepare_fast_dataloader(dataset, split='train', batch_size=batch_size)
-
-
 
     diffusion = GaussianMultinomialDiffusion(
         num_classes=K,

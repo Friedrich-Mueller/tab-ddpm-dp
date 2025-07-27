@@ -717,7 +717,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         # loss_gauss = torch.where(out_dict['y'] == 1, loss_gauss, 2 * loss_gauss)
 
         return loss_multi.mean(), loss_gauss.mean()
-    
+
     def mixed_loss(self, x, out_dict):
         b = x.shape[0]
         device = x.device

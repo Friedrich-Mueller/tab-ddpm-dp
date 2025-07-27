@@ -35,8 +35,8 @@ class Trainer:
         # self.optimizer = torch.optim.AdamW(self.diffusion.parameters(), lr=lr, weight_decay=weight_decay)
         self.device = device
         self.loss_history = pd.DataFrame(columns=['step', 'mloss', 'gloss', 'loss'])
-        self.log_every = 100
-        self.print_every = 100
+        self.log_every = 10
+        self.print_every = 10
         self.ema_every = 1000
 
         self.delta = dataset_len**-1
@@ -53,10 +53,13 @@ class Trainer:
 
         # self.noise_multiplier = 0 # no privacy
         # self.max_grad_norm = 1e6 # no privacy
+        self.noise_multiplier = 0.2546501159667969 # wilt
         # self.noise_multiplier = 0.25 # wilt
-        # self.max_grad_norm = 0.2 # wilt
-        self.noise_multiplier = 0.1 # adult
-        self.max_grad_norm = 0.2 # adult
+        self.max_grad_norm = 0.2 # wilt
+
+        # self.noise_multiplier = 0.1 # adult
+        # self.max_grad_norm = 0.2 # adult
+
 
 
         # self.noise_multiplier = 0.1  # old dp settings
@@ -123,7 +126,7 @@ class Trainer:
         self.optimizer.step()
 
         # Print gradients after Opacus has modified them
-        print_grad_stats(self.diffusion._module, "After Opacus")
+        # print_grad_stats(self.diffusion._module, "After Opacus")
 
         return (total_loss_multi / self.noise_multiplicity_K), (total_loss_gauss / self.noise_multiplicity_K)
 

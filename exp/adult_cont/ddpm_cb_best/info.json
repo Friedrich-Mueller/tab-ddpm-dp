@@ -1,0 +1,10 @@
+{
+    "name": "Adult_cont",
+    "id": "adult--cont",
+    "task_type": "binclass",
+    "n_num_features": 6,
+    "n_cat_features": 0,
+    "test_size": 16281,
+    "train_size": 26048,
+    "val_size": 6513
+}
