@@ -1149,6 +1149,85 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         sample = torch.cat([z_norm, z_cat], dim=1).cpu()
         return sample, out_dict
 
+    # @torch.no_grad()
+    # def sample(self, num_samples, y_dist):
+    #     print("calling def sample")
+    #     b = num_samples
+    #     device = self.log_alpha.device
+    #
+    #     def check_nan(name, tensor):
+    #         if torch.isnan(tensor).any():
+    #             print(f"❌ NaN detected: {name}")
+    #             print("  max:", torch.max(tensor).item(), "min:", torch.min(tensor).item())
+    #             raise FoundNANsError
+    #
+    #     # init z_norm
+    #     z_norm = torch.randn((b, self.num_numerical_features), device=device)
+    #     check_nan("init z_norm", z_norm)
+    #
+    #     has_cat = self.num_classes[0] != 0
+    #     log_z = torch.zeros((b, 0), device=device).float()
+    #     if has_cat:
+    #         uniform_logits = torch.zeros((b, len(self.num_classes_expanded)), device=device)
+    #         log_z = self.log_sample_categorical(uniform_logits)
+    #         check_nan("after log_sample_categorical", log_z)
+    #
+    #     y = torch.multinomial(y_dist, num_samples=b, replacement=True)
+    #     out_dict = {'y': y.long().to(device)}
+    #
+    #     # sampling loop
+    #     for i in reversed(range(0, self.num_timesteps)):
+    #         print(f"Sample timestep {i:4d}", end='\r')
+    #         t = torch.full((b,), i, device=device, dtype=torch.long)
+    #
+    #         # prepare model input once
+    #         input_to_model = torch.cat([z_norm, log_z], dim=1).float()
+    #
+    #         # check for bad values before feeding model
+    #         if torch.isnan(input_to_model).any() or torch.isinf(input_to_model).any():
+    #             print(f"❌ NaN/Inf in model input at step {i}")
+    #             print("  max:", torch.max(input_to_model).item(), "min:", torch.min(input_to_model).item())
+    #             raise FoundNANsError
+    #
+    #         # optional: clamp extremes to avoid model blow-up
+    #         # input_to_model = torch.clamp(input_to_model, min=-20, max=20)
+    #
+    #         # run denoising model
+    #         model_out = self._denoise_fn(input_to_model, t, **out_dict)
+    #
+    #         # check for NaNs in model output
+    #         check_nan(f"model_out at step {i}", model_out)
+    #
+    #         # split numerical vs categorical
+    #         model_out_num = model_out[:, :self.num_numerical_features]
+    #         model_out_cat = model_out[:, self.num_numerical_features:]
+    #
+    #         # update z_norm
+    #         z_norm = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['sample']
+    #         check_nan(f"z_norm after gaussian_p_sample at step {i}", z_norm)
+    #
+    #         # update log_z if categorical features exist
+    #         if has_cat:
+    #             log_z = self.p_sample(model_out_cat, log_z, t, out_dict)
+    #             check_nan(f"log_z after p_sample at step {i}", log_z)
+    #
+    #     print()
+    #     check_nan("final log_z before exp", log_z)
+    #
+    #     z_ohe = torch.exp(torch.clamp(log_z, min=-20, max=20)).round()
+    #     check_nan("z_ohe after exp", z_ohe)
+    #
+    #     z_cat = log_z
+    #     if has_cat:
+    #         z_cat = ohe_to_categories(z_ohe, self.num_classes)
+    #         check_nan("z_cat after ohe_to_categories", z_cat)
+    #
+    #     sample = torch.cat([z_norm, z_cat], dim=1).cpu()
+    #     check_nan("final sample", sample)
+    #
+    #     return sample, out_dict
+
+
     def sample_all(self, num_samples, batch_size, y_dist, ddim=False):
         # print("calling def sample_all")
         if ddim:

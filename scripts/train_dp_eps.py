@@ -84,7 +84,7 @@ class Trainer:
 
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
-        self.target_epsilon = 7
+        self.target_epsilon = 2
         epochs = steps / (dataset_len / batch_size)
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,
@@ -95,7 +95,8 @@ class Trainer:
             epochs=epochs,
             max_grad_norm=self.max_grad_norm,
         )
-        print(f"sigma={self.optimizer.noise_multiplier}\n"
+        print(f"target eps={self.target_epsilon}\n"
+              f"sigma={self.optimizer.noise_multiplier}\n"
               f"C={self.max_grad_norm}\n"
               f"lr: {self.init_lr}\n"
               f"lr_anneal: {lr_anneal}\n"
@@ -151,6 +152,21 @@ class Trainer:
 
         loss = (total_loss_multi / self.noise_multiplicity_K) + (total_loss_gauss / self.noise_multiplicity_K)
         loss.backward()
+
+        # After loss.backward():
+
+        # per_sample_grad_norms = []
+        # for param in self.diffusion.parameters():
+        #     if hasattr(param, 'grad_sample'):
+        #         grad_sample = param.grad_sample.reshape(param.grad_sample.shape[0], -1)
+        #         norms = torch.norm(grad_sample, dim=1)
+        #         per_sample_grad_norms.append(norms)
+        #
+        # per_sample_grad_norms = torch.stack(per_sample_grad_norms, dim=1)
+        # total_per_sample_norms = torch.norm(per_sample_grad_norms, dim=1)
+        # clipping_ratio = (total_per_sample_norms > self.max_grad_norm).float().mean().item()
+        #
+        # print(f"[DEBUG] Clipping ratio: {clipping_ratio:.4f}")
 
         # Print raw gradients (before Opacus modifies them)
         # print_grad_stats(self.diffusion._module, "Before Opacus")
