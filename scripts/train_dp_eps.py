@@ -84,7 +84,7 @@ class Trainer:
 
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
-        self.target_epsilon = 2
+        self.target_epsilon = 10
         epochs = steps / (dataset_len / batch_size)
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,

@@ -1,5 +1,5 @@
 seed = 0
-parent_dir = "exp/wilt/wilt_dp_eps_1_best"
+parent_dir = "exp/wilt/wilt_dp_eps_1.5_best"
 real_data_path = "data/wilt/"
 model_type = "mlp"
 num_numerical_features = 5
