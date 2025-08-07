@@ -7,7 +7,6 @@ from tab_ddpm import GaussianMultinomialDiffusion
 from utils_train import get_model, make_dataset, update_ema
 import lib
 import pandas as pd
-import math
 
 
 class Trainer:
@@ -23,51 +22,23 @@ class Trainer:
         self.optimizer = torch.optim.AdamW(self.diffusion.parameters(), lr=lr, weight_decay=weight_decay)
         self.device = device
         self.loss_history = pd.DataFrame(columns=['step', 'mloss', 'gloss', 'loss'])
-        self.log_every = 10
-        self.print_every = 50
+        self.log_every = 100
+        self.print_every = 500
         self.ema_every = 1000
-
-    # def _anneal_lr(self, step):
-    #     frac_done = step / self.steps
-    #     lr = self.init_lr * (1 - frac_done)
-    #     for param_group in self.optimizer.param_groups:
-    #         param_group["lr"] = lr
 
     def _anneal_lr(self, step):
         frac_done = step / self.steps
-        lr = self.init_lr * 0.5 * (1 + math.cos(math.pi * frac_done))
+        lr = self.init_lr * (1 - frac_done)
         for param_group in self.optimizer.param_groups:
             param_group["lr"] = lr
-
-    # def _run_step(self, x, out_dict):
-    #     x = x.to(self.device)
-    #     for k in out_dict:
-    #         out_dict[k] = out_dict[k].long().to(self.device)
-    #     self.optimizer.zero_grad()
-    #     loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-    #     loss = loss_multi + loss_gauss
-    #     loss.backward()
-    #     self.optimizer.step()
-    #
-    #     return loss_multi, loss_gauss
 
     def _run_step(self, x, out_dict):
         x = x.to(self.device)
         for k in out_dict:
             out_dict[k] = out_dict[k].long().to(self.device)
         self.optimizer.zero_grad()
-
-        # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-        total_loss_multi = 0.0
-        total_loss_gauss = 0.0
-        for i in range(8):
-            # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-            loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-            total_loss_multi += loss_multi
-            total_loss_gauss += loss_gauss
-        loss = (total_loss_multi / 8) + (total_loss_gauss / 9)
-
-        # loss = loss_multi + loss_gauss
+        loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+        loss = loss_multi + loss_gauss
         loss.backward()
         self.optimizer.step()
 

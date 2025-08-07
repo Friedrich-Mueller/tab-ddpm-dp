@@ -23,14 +23,12 @@ d_layers = [
 dropout = 0.0
 
 [diffusion_params]
-num_timesteps = 1000
+num_timesteps = 100
 gaussian_loss_type = "mse"
 
 [train.main]
-steps = 400
-lr = 0.00136436456821403
-#lr = 0.00010707356429215857
-#lr = 0.005
+steps = 30000
+lr = 0.00010707356429215857
 weight_decay = 0.0
 batch_size = 256
 
@@ -44,7 +42,7 @@ cat_encoding = "__none__"
 y_policy = "default"
 
 [sample]
-num_samples = 3096
+num_samples = 24800
 batch_size = 10000
 seed = 0
 
