@@ -144,14 +144,25 @@ class Trainer:
 
         total_loss_multi = 0.0
         total_loss_gauss = 0.0
+
+
         for i in range(self.noise_multiplicity_K):
             # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
             loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
             total_loss_multi += loss_multi
             total_loss_gauss += loss_gauss
 
-        loss = (total_loss_multi / self.noise_multiplicity_K) + (total_loss_gauss / self.noise_multiplicity_K)
+        total_loss_multi = total_loss_multi / self.noise_multiplicity_K
+        total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
+        loss = total_loss_multi + total_loss_gauss
         loss.backward()
+
+
+        # total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss(x, out_dict, self.noise_multiplicity_K)
+        # loss = total_loss_multi + total_loss_gauss
+        # loss.backward()
+
+
 
         # After loss.backward():
 
@@ -176,7 +187,9 @@ class Trainer:
         # Print gradients after Opacus has modified them
         # print_grad_stats(self.diffusion._module, "After Opacus")
 
-        return (total_loss_multi / self.noise_multiplicity_K), (total_loss_gauss / self.noise_multiplicity_K)
+        # return (total_loss_multi / self.noise_multiplicity_K), (total_loss_gauss / self.noise_multiplicity_K)
+        return total_loss_multi, total_loss_gauss
+
 
     def run_loop(self):
         step = 0

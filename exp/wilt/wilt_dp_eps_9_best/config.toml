@@ -1,4 +1,4 @@
-seed = 0
+seed = 3
 parent_dir = "exp/wilt/wilt_dp_eps_9_best"
 real_data_path = "data/wilt/"
 model_type = "mlp"

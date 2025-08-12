@@ -34,7 +34,7 @@ lr_anneal = "cosine"
 weight_decay = 0.0
 batch_size = 256
 max_grad_norm = 0.46165049332108
-noise_multiplicity = 71
+noise_multiplicity = 7
 
 [train.T]
 seed = 0
