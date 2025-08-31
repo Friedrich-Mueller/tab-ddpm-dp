@@ -1,5 +1,5 @@
 seed = 0
-parent_dir = "exp/wilt/many-exps/4"
+parent_dir = "exp/wilt/many-exps/12"
 real_data_path = "data/wilt/"
 model_type = "mlp"
 num_numerical_features = 5
@@ -28,12 +28,12 @@ gaussian_loss_type = "mse"
 scheduler = "cosine"
 
 [train.main]
-steps = 756
-lr = 0.005270284970780852
+steps = 400
+lr = 0.0016317093678629281
 lr_anneal = "cosine"
 weight_decay = 0.0
 batch_size = 256
-max_grad_norm = 3.186110802409793
+max_grad_norm = 0.1726790945165619
 noise_multiplicity = 16
 
 [train.T]

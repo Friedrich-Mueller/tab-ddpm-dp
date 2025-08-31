@@ -155,20 +155,20 @@ def objective(trial):
     # noise_multiplicity = trial.suggest_int("noise_multiplicity", 10, 130)
 
     ### WILT eps 7
-    lr = trial.suggest_loguniform('lr', 0.004, 0.0065)
+    lr = trial.suggest_loguniform('lr', 0.001, 0.0065)
     # lr = trial.suggest_categorical('lr', [0.00436436456821403])
     # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
     lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine'])
     # d_layers = _suggest_mlp_layers(trial)
     weight_decay = 0.0
     batch_size = trial.suggest_categorical('batch_size', [256])
-    steps = trial.suggest_int("steps", 200, 800)
-    # steps = trial.suggest_categorical('steps', [500]) # for debug
+    # steps = trial.suggest_int("steps", 200, 800)
+    steps = trial.suggest_categorical('steps', [400]) # for debug
     gaussian_loss_type = 'mse'
     # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
     num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
     # num_samples = int(train_size * (2 ** trial.suggest_int('num_samples', -2, 1)))
-    max_grad_norm = trial.suggest_loguniform("max_grad_norm", 3.0, 7.0)
+    max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.01, 7.0)
     # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.46165049332108])
     noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [16])
     # noise_multiplicity = trial.suggest_int("noise_multiplicity", 10, 150)

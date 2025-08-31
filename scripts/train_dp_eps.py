@@ -84,7 +84,7 @@ class Trainer:
 
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
-        self.target_epsilon = 3
+        self.target_epsilon = 10
         epochs = steps / (dataset_len / batch_size)
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,
@@ -146,21 +146,21 @@ class Trainer:
         total_loss_gauss = 0.0
 
 
-        for i in range(self.noise_multiplicity_K):
-            # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-            loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
-            total_loss_multi += loss_multi
-            total_loss_gauss += loss_gauss
-
-        total_loss_multi = total_loss_multi / self.noise_multiplicity_K
-        total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
-        loss = total_loss_multi + total_loss_gauss
-        loss.backward()
-
-
-        # total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss(x, out_dict, self.noise_multiplicity_K)
+        # for i in range(self.noise_multiplicity_K):
+        #     # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+        #     loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
+        #     total_loss_multi += loss_multi
+        #     total_loss_gauss += loss_gauss
+        #
+        # total_loss_multi = total_loss_multi / self.noise_multiplicity_K
+        # total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
         # loss = total_loss_multi + total_loss_gauss
         # loss.backward()
+
+
+        total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss_stable(x, out_dict, self.noise_multiplicity_K)
+        loss = total_loss_multi + total_loss_gauss
+        loss.backward()
 
 
 
