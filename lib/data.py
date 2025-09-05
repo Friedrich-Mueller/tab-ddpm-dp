@@ -618,6 +618,8 @@ def prepare_dp_dataloader(
     split : str,
     batch_size: int
 ):
+    ### Left this function in, as it helps in understanding prepare_fast_dp_dataloader() below
+    ### Feed both functions, including the FastTensorDataset class to chatgpt and let it explain :)
     if D.X_cat is not None:
         if D.X_num is not None:
             X = torch.from_numpy(np.concatenate([D.X_num[split], D.X_cat[split]], axis=1)).float()

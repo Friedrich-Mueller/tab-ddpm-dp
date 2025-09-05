@@ -61,26 +61,9 @@ class Trainer:
         MAKE PRIVATE
         START
         """
-        # self.noise_multiplier = 1.0239028930664062 # make_private_with_epsilon with eps 500
-
-
 
         # self.noise_multiplier = 0 # no privacy
         # self.max_grad_norm = 1e6 # no privacy
-        # self.noise_multiplier = 0.25 # wilt
-        # self.max_grad_norm = 0.2 # wilt
-        # self.max_grad_norm = 0
-        # lr = 0.005
-
-        # self.noise_multiplier = 0.1 # adult
-        # self.max_grad_norm = 0.2 # adult
-
-
-        # self.noise_multiplier = 0.1  # old dp settings
-        # self.max_grad_norm = 0.01  # old dp settings
-
-        # enter PrivacyEngine
-
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
         self.target_epsilon = epsilon
@@ -98,17 +81,14 @@ class Trainer:
         print(f"target eps={self.target_epsilon}\n"
               f"sigma={self.optimizer.noise_multiplier}\n"
               f"C={self.max_grad_norm}\n"
+              f"noise_multiplicity_K: {self.noise_multiplicity_K}"
               f"lr: {self.init_lr}\n"
-              f"lr_anneal: {lr_anneal}\n"
-              f"noise_multiplicity_K: {self.noise_multiplicity_K}")
+              f"lr_anneal: {lr_anneal}\n")
         """
         MAKE PRIVATE
         END
         """
 
-        # self.diffusion = diffusion
-        # self.optimizer = torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay)
-        # self.train_iter = train_iter
 
     # linear decay
     def _anneal_lr_linear(self, step):
@@ -134,8 +114,6 @@ class Trainer:
         for param_group in self.optimizer.param_groups:
             param_group["lr"] = lr
 
-
-
     def _run_step(self, x, out_dict):
         x = x.to(self.device)
         for k in out_dict:
@@ -145,7 +123,7 @@ class Trainer:
         total_loss_multi = 0.0
         total_loss_gauss = 0.0
 
-
+        ### Implementation of noise multiplicity with new noise drawn for each timestep
         for i in range(self.noise_multiplicity_K):
             # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
             loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
@@ -157,15 +135,13 @@ class Trainer:
         loss = total_loss_multi + total_loss_gauss
         loss.backward()
 
-
+        ### Implementation of noise multiplicity with noise drawn once and reused for each timestep
         # total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss_stable(x, out_dict, self.noise_multiplicity_K)
         # loss = total_loss_multi + total_loss_gauss
         # loss.backward()
 
 
-
-        # After loss.backward():
-
+        # ### The following can be used to estimate gradient clipping magnitudes 'manually', so save a lot of tuning time
         # per_sample_grad_norms = []
         # for param in self.diffusion.parameters():
         #     if hasattr(param, 'grad_sample'):
@@ -178,18 +154,16 @@ class Trainer:
         # clipping_ratio = (total_per_sample_norms > self.max_grad_norm).float().mean().item()
         #
         # print(f"[DEBUG] Clipping ratio: {clipping_ratio:.4f}")
-
-        # Print raw gradients (before Opacus modifies them)
+        #
+        # ### Print raw gradients (before Opacus modifies them)
         # print_grad_stats(self.diffusion._module, "Before Opacus")
-
-        self.optimizer.step()
-
-        # Print gradients after Opacus has modified them
+        #
+        # self.optimizer.step()
+        #
+        # ### Print gradients after Opacus has modified them
         # print_grad_stats(self.diffusion._module, "After Opacus")
 
-        # return (total_loss_multi / self.noise_multiplicity_K), (total_loss_gauss / self.noise_multiplicity_K)
         return total_loss_multi, total_loss_gauss
-
 
     def run_loop(self):
         step = 0
@@ -232,18 +206,11 @@ class Trainer:
 
             step += 1
 
-
             epsilon = self.privacy_engine.get_epsilon(delta=self.delta)
             # **Added: Print privacy statistics**
             if (step + 1) % self.print_every == 0:
                 epsilon = self.privacy_engine.accountant.get_epsilon(delta=self.delta)
                 print(f"Step {step + 1}: Privacy ε = {epsilon:.2f}, δ = {self.delta}")
-
-            # if epsilon > self.target_epsilon:
-            #     print("TARGET EPSILON REACHED. STOPPING.")
-            #     print(f"Step {step+1}: Privacy ε = {epsilon:.2f}, δ = {self.delta}")
-            #     break
-
 
 def train_dp_eps(
         epsilon,
