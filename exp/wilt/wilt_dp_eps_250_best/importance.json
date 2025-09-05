@@ -1,8 +1,0 @@
-{
-    "lr": 0.8270879987562348,
-    "max_grad_norm": 0.15595255817160825,
-    "noise_multiplicity": 0.016959443072156917,
-    "steps": 0.0,
-    "num_timesteps": 0.0,
-    "batch_size": 0.0
-}

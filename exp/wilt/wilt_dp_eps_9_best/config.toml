@@ -1,4 +1,4 @@
-seed = 3
+seed = 0
 parent_dir = "exp/wilt/wilt_dp_eps_9_best"
 real_data_path = "data/wilt/"
 model_type = "mlp"
@@ -30,10 +30,12 @@ scheduler = "cosine"
 [train.main]
 steps = 400
 lr = 0.0047781567509498505
-lr_anneal = "cosine"
 weight_decay = 0.0
 batch_size = 256
-max_grad_norm = 0.58700121482468195
+
+[train.dp]
+lr_anneal = "cosine"
+max_grad_norm = 0.5870012148246819
 noise_multiplicity = 16
 
 [train.T]
@@ -48,7 +50,7 @@ y_policy = "default"
 [sample]
 num_samples = 24800
 batch_size = 10000
-seed = 0
+seed = 4
 
 [eval.type]
 eval_model = "catboost"

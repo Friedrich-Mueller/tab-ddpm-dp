@@ -30,9 +30,11 @@ scheduler = "cosine"
 [train.main]
 steps = 400
 lr = 0.00436436456821403
-lr_anneal = "cosine"
 weight_decay = 0.0
 batch_size = 256
+
+[train.dp]
+lr_anneal = "cosine"
 max_grad_norm = 0.46165049332108
 noise_multiplicity = 71
 

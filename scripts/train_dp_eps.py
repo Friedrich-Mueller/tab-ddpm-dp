@@ -24,7 +24,7 @@ def print_grad_stats(model, name="Before Opacus"):
 
 
 class Trainer:
-    def __init__(self, diffusion, train_iter, batch_size,  max_grad_norm, noise_multiplicity, dataset_len, lr, lr_anneal, weight_decay, steps, device=torch.device('cuda:1')):
+    def __init__(self, diffusion, train_iter, batch_size, epsilon, max_grad_norm, noise_multiplicity, dataset_len, lr, lr_anneal, weight_decay, steps, device=torch.device('cuda:1')):
         # self.diffusion = diffusion
         self.ema_model = deepcopy(diffusion._denoise_fn)
         for param in self.ema_model.parameters():
@@ -70,7 +70,6 @@ class Trainer:
         # self.noise_multiplier = 0.25 # wilt
         # self.max_grad_norm = 0.2 # wilt
         # self.max_grad_norm = 0
-        self.max_grad_norm = max_grad_norm
         # lr = 0.005
 
         # self.noise_multiplier = 0.1 # adult
@@ -84,7 +83,8 @@ class Trainer:
 
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
-        self.target_epsilon = 10
+        self.target_epsilon = epsilon
+        self.max_grad_norm = max_grad_norm
         epochs = steps / (dataset_len / batch_size)
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,
@@ -146,21 +146,21 @@ class Trainer:
         total_loss_gauss = 0.0
 
 
-        # for i in range(self.noise_multiplicity_K):
-        #     # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-        #     loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
-        #     total_loss_multi += loss_multi
-        #     total_loss_gauss += loss_gauss
-        #
-        # total_loss_multi = total_loss_multi / self.noise_multiplicity_K
-        # total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
-        # loss = total_loss_multi + total_loss_gauss
-        # loss.backward()
+        for i in range(self.noise_multiplicity_K):
+            # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
+            loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
+            total_loss_multi += loss_multi
+            total_loss_gauss += loss_gauss
 
-
-        total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss_stable(x, out_dict, self.noise_multiplicity_K)
+        total_loss_multi = total_loss_multi / self.noise_multiplicity_K
+        total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
         loss = total_loss_multi + total_loss_gauss
         loss.backward()
+
+
+        # total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss_stable(x, out_dict, self.noise_multiplicity_K)
+        # loss = total_loss_multi + total_loss_gauss
+        # loss.backward()
 
 
 
@@ -246,13 +246,14 @@ class Trainer:
 
 
 def train_dp_eps(
+        epsilon,
         parent_dir,
         real_data_path='data/higgs-small',
         steps=1000,
         lr=0.002,
-        lr_anneal='linear',
         weight_decay=1e-4,
         batch_size=1024,
+        lr_anneal='linear',
         max_grad_norm=0.4,
         noise_multiplicity=1,
         model_type='mlp',
@@ -265,6 +266,7 @@ def train_dp_eps(
         device=torch.device('cuda:1'),
         seed=0,
         change_val=False
+
 ):
     real_data_path = os.path.normpath(real_data_path)
     parent_dir = os.path.normpath(parent_dir)
@@ -329,6 +331,7 @@ def train_dp_eps(
         train_loader,
         dataset_len=dataset_len,
         batch_size=batch_size,
+        epsilon=epsilon,
         max_grad_norm=max_grad_norm,
         noise_multiplicity=noise_multiplicity,
         lr=lr,

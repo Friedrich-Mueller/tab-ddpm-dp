@@ -1,9 +1,11 @@
 {
-    "lr": 0.5002355663293605,
-    "max_grad_norm": 0.4997644336706395,
+    "d_last": 0.343750000000001,
+    "num_timesteps": 0.21875000000000064,
+    "lr": 0.1874999999999986,
+    "d_middle": 0.15625000000000044,
+    "num_samples": 0.09374999999999929,
     "steps": 0.0,
-    "num_timesteps": 0.0,
-    "noise_multiplicity": 0.0,
-    "lr_anneal": 0.0,
+    "n_layers": 0.0,
+    "d_first": 0.0,
     "batch_size": 0.0
 }
