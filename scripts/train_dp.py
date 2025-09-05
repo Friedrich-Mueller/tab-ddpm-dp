@@ -63,7 +63,7 @@ class Trainer:
 
 
         # self.noise_multiplier = 0.1  # old dp settings
-        # self.max_grad_norm = 0.01  # old dp settings
+        # self.max_grad_norm = 0.5870012148246819
 
         # enter PrivacyEngine
 

@@ -81,9 +81,9 @@ class Trainer:
         print(f"target eps={self.target_epsilon}\n"
               f"sigma={self.optimizer.noise_multiplier}\n"
               f"C={self.max_grad_norm}\n"
-              f"noise_multiplicity_K: {self.noise_multiplicity_K}"
+              f"noise_multiplicity_K: {self.noise_multiplicity_K}\n"
               f"lr: {self.init_lr}\n"
-              f"lr_anneal: {lr_anneal}\n")
+              f"lr_anneal: {lr_anneal}")
         """
         MAKE PRIVATE
         END
@@ -129,7 +129,6 @@ class Trainer:
             loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
             total_loss_multi += loss_multi
             total_loss_gauss += loss_gauss
-
         total_loss_multi = total_loss_multi / self.noise_multiplicity_K
         total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
         loss = total_loss_multi + total_loss_gauss
