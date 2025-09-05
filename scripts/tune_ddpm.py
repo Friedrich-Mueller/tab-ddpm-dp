@@ -22,7 +22,6 @@ if args.dp:
 else:
     cmd_train_file_location = '--train'
 
-
 train_size = args.train_size
 ds_name = args.ds_name
 eval_type = args.eval_type 
