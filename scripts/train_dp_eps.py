@@ -54,8 +54,7 @@ class Trainer:
         self.ema_every = 1000
 
         self.delta = dataset_len**-1
-
-        self.noise_multiplicity_K = noise_multiplicity #50 both yield results
+        self.noise_multiplicity_K = noise_multiplicity
 
         """
         MAKE PRIVATE
