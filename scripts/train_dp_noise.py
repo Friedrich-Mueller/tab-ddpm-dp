@@ -13,6 +13,16 @@ import pandas as pd
 
 from opacus import PrivacyEngine
 
+def print_grad_stats(model, name="Before Opacus"):
+    grads = []
+    for param in model.parameters():
+        if param.grad is not None:
+            grads.append(param.grad.view(-1))  # Flatten gradients
+    if grads:
+        grads = torch.cat(grads)
+        print(f"[{name}] Gradients - Mean: {grads.mean().item():.6f}, Std: {grads.std().item():.6f}, Max: {grads.max().item():.6f}, Min: {grads.min().item():.6f}")
+
+
 class Trainer:
     def __init__(self, diffusion, train_iter, batch_size, epsilon, max_grad_norm, noise_multiplicity, dataset_len, lr, lr_anneal, weight_decay, steps, device=torch.device('cuda:1')):
         # self.diffusion = diffusion
@@ -129,7 +139,7 @@ class Trainer:
         # loss.backward()
 
 
-        # ### The following can be used to estimate gradient clipping magnitudes 'manually'
+        # ### The following can be used to estimate gradient clipping magnitudes 'manually', so save a lot of tuning time
         # per_sample_grad_norms = []
         # for param in self.diffusion.parameters():
         #     if hasattr(param, 'grad_sample'):
