@@ -24,7 +24,7 @@ def print_grad_stats(model, name="Before Opacus"):
 
 
 class Trainer:
-    def __init__(self, diffusion, train_iter, batch_size, epsilon, max_grad_norm, noise_multiplicity, dataset_len, lr, lr_anneal, weight_decay, steps, device=torch.device('cuda:1')):
+    def __init__(self, diffusion, train_iter, batch_size, noise_multiplier, max_grad_norm, noise_multiplicity, dataset_len, lr, lr_anneal, weight_decay, steps, device=torch.device('cuda:1')):
         # self.diffusion = diffusion
         self.ema_model = deepcopy(diffusion._denoise_fn)
         for param in self.ema_model.parameters():
@@ -60,26 +60,32 @@ class Trainer:
         MAKE PRIVATE
         START
         """
-
         # self.noise_multiplier = 0 # no privacy
         # self.max_grad_norm = 1e6 # no privacy
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
-        self.target_epsilon = epsilon
+        self.noise_multiplier = noise_multiplier
         self.max_grad_norm = max_grad_norm
-        epochs = steps / (dataset_len / batch_size)
-        self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
+        # epochs = steps / (dataset_len / batch_size)
+        # self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
+        #     module=diffusion,
+        #     optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
+        #     data_loader=train_iter,
+        #     target_delta=self.delta,
+        #     target_epsilon=self.target_epsilon,
+        #     epochs=epochs,
+        #     max_grad_norm=self.max_grad_norm,
+        # )
+        self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private(
             module=diffusion,
             optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
             data_loader=train_iter,
-            target_delta=self.delta,
-            target_epsilon=self.target_epsilon,
-            epochs=epochs,
+            noise_multiplier=self.noise_multiplier,
             max_grad_norm=self.max_grad_norm,
         )
-        print(f"target eps={self.target_epsilon}\n"
-              f"sigma={self.optimizer.noise_multiplier}\n"
-              f"C={self.max_grad_norm}\n"
+        print(f"target sigma(noise): {self.noise_multiplier}\n"
+              f"eps: {'TBD'}\n"
+              f"C: {self.max_grad_norm}\n"
               f"noise_multiplicity_K: {self.noise_multiplicity_K}\n"
               f"lr: {self.init_lr}\n"
               f"lr_anneal: {lr_anneal}")
@@ -139,7 +145,7 @@ class Trainer:
         # loss.backward()
 
 
-        # ### The following can be used to estimate gradient clipping magnitudes 'manually', so save a lot of tuning time
+        ### The following can be used to estimate gradient clipping magnitudes 'manually', so save a lot of tuning time
         # per_sample_grad_norms = []
         # for param in self.diffusion.parameters():
         #     if hasattr(param, 'grad_sample'):
@@ -152,13 +158,13 @@ class Trainer:
         # clipping_ratio = (total_per_sample_norms > self.max_grad_norm).float().mean().item()
         #
         # print(f"[DEBUG] Clipping ratio: {clipping_ratio:.4f}")
-        #
-        # ### Print raw gradients (before Opacus modifies them)
+
+        ### Print raw gradients (before Opacus modifies them)
         # print_grad_stats(self.diffusion._module, "Before Opacus")
-        #
-        # self.optimizer.step()
-        #
-        # ### Print gradients after Opacus has modified them
+
+        self.optimizer.step()
+
+        ### Print gradients after Opacus has modified them
         # print_grad_stats(self.diffusion._module, "After Opacus")
 
         return total_loss_multi, total_loss_gauss
@@ -210,8 +216,8 @@ class Trainer:
                 epsilon = self.privacy_engine.accountant.get_epsilon(delta=self.delta)
                 print(f"Step {step + 1}: Privacy ε = {epsilon:.2f}, δ = {self.delta}")
 
-def train_dp_eps(
-        epsilon,
+def train_dp_noise(
+        noise_multiplier,
         parent_dir,
         real_data_path='data/higgs-small',
         steps=1000,
@@ -296,7 +302,7 @@ def train_dp_eps(
         train_loader,
         dataset_len=dataset_len,
         batch_size=batch_size,
-        epsilon=epsilon,
+        noise_multiplier=noise_multiplier,
         max_grad_norm=max_grad_norm,
         noise_multiplicity=noise_multiplicity,
         lr=lr,

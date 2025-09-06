@@ -50,7 +50,6 @@ class Trainer:
         MAKE PRIVATE
         START
         """
-
         # self.noise_multiplier = 0 # no privacy
         # self.max_grad_norm = 1e6 # no privacy
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
@@ -67,9 +66,9 @@ class Trainer:
             epochs=epochs,
             max_grad_norm=self.max_grad_norm,
         )
-        print(f"target eps={self.target_epsilon}\n"
-              f"sigma={self.optimizer.noise_multiplier}\n"
-              f"C={self.max_grad_norm}\n"
+        print(f"target eps: {self.target_epsilon}\n"
+              f"sigma: {self.optimizer.noise_multiplier}\n"
+              f"C: {self.max_grad_norm}\n"
               f"noise_multiplicity_K: {self.noise_multiplicity_K}\n"
               f"lr: {self.init_lr}\n"
               f"lr_anneal: {lr_anneal}")
@@ -129,7 +128,7 @@ class Trainer:
         # loss.backward()
 
 
-        # ### The following can be used to estimate gradient clipping magnitudes 'manually'
+        ### The following can be used to estimate gradient clipping magnitudes 'manually'
         # per_sample_grad_norms = []
         # for param in self.diffusion.parameters():
         #     if hasattr(param, 'grad_sample'):
@@ -145,9 +144,10 @@ class Trainer:
         #
         # ### Print raw gradients (before Opacus modifies them)
         # print_grad_stats(self.diffusion._module, "Before Opacus")
-        #
-        # self.optimizer.step()
-        #
+
+
+        self.optimizer.step()
+
         # ### Print gradients after Opacus has modified them
         # print_grad_stats(self.diffusion._module, "After Opacus")
 

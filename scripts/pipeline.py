@@ -3,8 +3,8 @@ import shutil
 import os
 import argparse
 from train import train
-from train_dp import train_dp
 from train_dp_eps import train_dp_eps
+from train_dp_noise import train_dp_noise
 from sample import sample
 from eval_catboost import train_catboost
 from eval_mlp import train_mlp
@@ -31,10 +31,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', metavar='FILE')
     parser.add_argument('--train', action='store_true', default=False)
-    parser.add_argument('--train_dp', action='store_true', default=False)
-    parser.add_argument('--train_dp_old', action='store_true', default=False)
-    # parser.add_argument('--train_dp_eps', action='store_true', default=False)
     parser.add_argument('--train_dp_eps', type=float, default=False)
+    parser.add_argument('--train_dp_noise', type=float, default=False)
     parser.add_argument('--sample', action='store_true',  default=False)
     parser.add_argument('--eval', action='store_true',  default=False)
     parser.add_argument('--change_val', action='store_true',  default=False)
@@ -63,10 +61,12 @@ def main():
             device=device,
             change_val=args.change_val
         )
-    if args.train_dp:
-        train_dp(
+    if args.train_dp_eps:
+        train_dp_eps(
+            epsilon=args.train_dp_eps,
             **raw_config['train']['main'],
             **raw_config['diffusion_params'],
+            **raw_config['train']['dp'],
             parent_dir=raw_config['parent_dir'],
             real_data_path=raw_config['real_data_path'],
             model_type=raw_config['model_type'],
@@ -74,11 +74,11 @@ def main():
             T_dict=raw_config['train']['T'],
             num_numerical_features=raw_config['num_numerical_features'],
             device=device,
-            change_val=args.change_val
+            change_val=args.change_val,
         )
-    if args.train_dp_eps:
-        train_dp_eps(
-            epsilon=args.train_dp_eps,
+    if args.train_dp_noise:
+        train_dp_noise(
+            noise_multiplier=args.train_dp_noise,
             **raw_config['train']['main'],
             **raw_config['diffusion_params'],
             **raw_config['train']['dp'],
