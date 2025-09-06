@@ -141,10 +141,9 @@ class Trainer:
         # clipping_ratio = (total_per_sample_norms > self.max_grad_norm).float().mean().item()
         #
         # print(f"[DEBUG] Clipping ratio: {clipping_ratio:.4f}")
-        #
+
         # ### Print raw gradients (before Opacus modifies them)
         # print_grad_stats(self.diffusion._module, "Before Opacus")
-
 
         self.optimizer.step()
 
