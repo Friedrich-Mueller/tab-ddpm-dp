@@ -23,4 +23,4 @@ data/
 src/datasets/
 src/evaluation/
 .idea/
-.ipynb_checkpoints/
+notebooks/
