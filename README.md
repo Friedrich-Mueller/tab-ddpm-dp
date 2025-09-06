@@ -1,6 +1,5 @@
-# TabDDPM: Modelling Tabular Data with Diffusion Models
-Differentially Private TabDDPM (DP-TabDDPM)
-This repository is a modified implementation of [TabDDPM](https://github.com/yandex-research/tab-ddpm), extended to support differential privacy using DP-SGD (Differentially Private Stochastic Gradient Descent). The goal is to enable privacy-preserving synthetic tabular data generation by integrating principled privacy guarantees directly into the training process.
+# Differentially Private TabDDPM (DP-TabDDPM): Modelling Tabular Data with Differentially Private Diffusion Models
+This repository is a modified implementation of [TabDDPM](https://github.com/yandex-research/tab-ddpm), extended to support differential privacy using DP-SGD (Differentially Private Stochastic Gradient Descent). All credit for the codebase goes to [TabDDPM](https://github.com/yandex-research/tab-ddpm). 
 
 Features:
 
