@@ -150,3 +150,8 @@ Template and example:
 python scripts/eval_seeds.py --config [path_to_your_config] [n_eval_seeds] [ddpm|smote|ctabgan|ctabgan-plus|tvae] synthetic [catboost|mlp] [n_sample_seeds]
 python scripts/eval_seeds.py --config exp/churn2/ddpm_cb_best/config.toml 10 ddpm synthetic catboost 5
 ```
+
+
+--- 
+
+If you find any errors or run into problems, please don't hesitate reaching out to me.
