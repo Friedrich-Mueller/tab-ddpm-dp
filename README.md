@@ -20,7 +20,7 @@ Features:
 
 [//]: # (You can view all the results and build your own tables with this [notebook]&#40;notebooks/Reports.ipynb&#41;. -->)
 
-For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/yandex-research/tab-ddpm?tab=readme-ov-file#Examples---DP-TabDDPM) 
+For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/Friedrich-Mueller/tab-ddpm-dp?tab=readme-ov-file#examples-dp-tabddpm) 
 
 
 ## Setup the environment
@@ -67,25 +67,8 @@ tar -xvf data.tar
 ```
 
 ### File structure
-`tab-ddpm/` -- implementation of the proposed method  
-`tuned_models/` -- tuned hyperparameters of evaluation model (CatBoost or MLP)
 
-All main scripts are in `scripts/` folder:
-
-- `scripts/pipeline.py` are used to train, sample and eval TabDDPM using a given config  
-- `scripts/tune_ddpm.py` -- tune hyperparameters of TabDDPM
-- `scripts/eval_[catboost|mlp|simple].py` -- evaluate synthetic data using a tuned evaluation model or simple models
-- `scripts/eval_seeds.py` -- eval using multiple sampling and multuple eval seeds
-- `scripts/eval_seeds_simple.py` --  eval using multiple sampling and multuple eval seeds (for simple models)
-- `scripts/tune_evaluation_model.py` -- tune hyperparameters of eval model (CatBoost or MLP)
-- `scripts/resample_privacy.py` -- privacy calculation  
-
-Experiments folder (`exp/`):
-- All results and synthetic data are stored in `exp/[ds_name]/[exp_name]/` folder
-- `exp/[ds_name]/config.toml` is a base config for tuning TabDDPM
-- `exp/[ds_name]/eval_[catboost|mlp].json` stores results of evaluation (`scripts/eval_seeds.py`)  
-
-To understand the structure of `config.toml` file, read `CONFIG_DESCRIPTION.md`.
+For the file structure, please refer to the [original repo](https://github.com/yandex-research/tab-ddpm?tab=readme-ov-file#file-structure)
 
 ### Examples DP-TabDDPM
 
@@ -117,7 +100,7 @@ python scripts/pipeline.py --config exp/wilt/wilt_dp_eps_9_best/config.toml --tr
 Note how the first example will train a model while maintaining differential privacy with given target epsilon (here $\epsilon$ = 9).<br>
 Note how the second example will train a model while maintaining a given target noise injection (here $\sigma$ = 1.063232421875).
 
-(With the current config.toml in ../wilt_dp_eps_9_best a target $\epsilon$ = 9 results in of $\sigma$ = 1.063232421875 and vice versa.)  
+(With the current config.toml in ../wilt_dp_eps_9_best a target $\epsilon$ = 9 results in $\sigma$ = 1.063232421875 and vice versa.)  
 
 ### Examples - TabDDPM
 
