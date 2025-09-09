@@ -14,11 +14,14 @@ parser.add_argument('eval_type', type=str)
 parser.add_argument('eval_model', type=str)
 parser.add_argument('prefix', type=str)
 parser.add_argument('--eval_seeds', action='store_true',  default=False)
-parser.add_argument('--dp', type=float, default=False)
+parser.add_argument('--dp_eps', type=float, default=False)
+parser.add_argument('--dp_noise', type=float, default=False)
 
 args = parser.parse_args()
-if args.dp:
-    cmd_train_file_location = '--train_dp_eps '+str(args.dp)
+if args.dp_eps:
+    cmd_train_file_location = '--train_dp_eps ' + str(args.dp_eps)
+elif args.dp_noise:
+    cmd_train_file_location = '--train_dp_noise ' + str(args.dp_noise)
 else:
     cmd_train_file_location = '--train'
 
@@ -80,7 +83,7 @@ def objective(trial):
     # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
     num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
     # num_samples = int(train_size * (2 ** trial.suggest_int('num_samples', -2, 1)))
-    if args.dp:
+    if args.dp_eps or args.dp_noise:
         # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
         lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine']) # for debug
         # max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.01, 7.0)
@@ -91,7 +94,7 @@ def objective(trial):
     base_config = lib.load_config(base_config_path)
 
     base_config['train']['main']['lr'] = lr
-    if args.dp:
+    if args.dp_eps or args.dp_noise:
         base_config['train']['dp']['lr_anneal'] = lr_anneal
         base_config['train']['dp']['max_grad_norm'] = max_grad_norm
         base_config['train']['dp']['noise_multiplicity'] = noise_multiplicity
