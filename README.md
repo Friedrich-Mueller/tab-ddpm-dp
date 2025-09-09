@@ -60,7 +60,7 @@ Nothing changed here. You can download their datasets and run them just as you c
 You could load the datasets with the following commands:
 
 ``` bash
-conda activate tddpm
+conda activate tddpm-dp
 cd $PROJECT_DIR
 wget "https://www.dropbox.com/s/rpckvcs3vx7j605/data.tar?dl=0" -O data.tar
 tar -xvf data.tar
@@ -80,6 +80,7 @@ Either `--dp_eps [Int|Float]` or `--dp_noise [Int|Float]` is required.
 Template and examples (`--eval_seeds` is optional):
 ```bash
 python scripts/tune_ddpm.py [ds_name] [train_size] synthetic [catboost|mlp] [exp_name] --eval_seeds --dp_eps [epsilon]
+python scripts/tune_ddpm.py [ds_name] [train_size] synthetic [catboost|mlp] [exp_name] --eval_seeds --train_dp_noise [noise]
 python scripts/tune_ddpm.py wilt 3096 synthetic catboost wilt_dp_eps_9 --eval_seeds --dp_eps 9
 python scripts/tune_ddpm.py wilt 3096 synthetic catboost wilt_dp_eps_9 --eval_seeds --train_dp_noise 1.063232421875
 ```
