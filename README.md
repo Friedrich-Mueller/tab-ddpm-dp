@@ -20,9 +20,7 @@ Features:
 
 [//]: # (You can view all the results and build your own tables with this [notebook]&#40;notebooks/Reports.ipynb&#41;. -->)
 
-For , and [running the experiments](https://github.com/yandex-research/tab-ddpm?tab=readme-ov-file#running-the-experiments) outside of Differential Privacy, please refer to the original repo of TabDDPM.
-
-For examples pointing out the additional differentially private options and how they are executed:
+For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/yandex-research/tab-ddpm?tab=readme-ov-file#Examples---DP-TabDDPM) 
 
 
 ## Setup the environment
@@ -89,9 +87,7 @@ Experiments folder (`exp/`):
 
 To understand the structure of `config.toml` file, read `CONFIG_DESCRIPTION.md`.
 
-### Examples
-
-#### DP-TabDDPM
+### Examples DP-TabDDPM
 
 
 <ins>Run DP-TabDDPM tuning.</ins>   
@@ -123,7 +119,7 @@ Note how the second example will train a model while maintaining a given target 
 
 (With the current config.toml in ../wilt_dp_eps_9_best a target $\epsilon$ = 9 results in of $\sigma$ = 1.063232421875 and vice versa.)  
 
-#### TabDDPM
+### Examples - TabDDPM
 
 <ins>Run TabDDPM tuning.</ins>   
 
