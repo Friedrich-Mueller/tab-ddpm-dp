@@ -11,14 +11,10 @@ is_y_cond = true
 
 [model_params.rtdl_params]
 d_layers = [
-    1024,
-    512,
-    512,
-    512,
-    512,
-    512,
     512,
     128,
+    128,
+    512,
 ]
 dropout = 0.0
 
@@ -28,15 +24,15 @@ gaussian_loss_type = "mse"
 scheduler = "cosine"
 
 [train.main]
-steps = 400
-lr_anneal = "cosine"
+steps = 732
+lr = 0.00403520990821463
 weight_decay = 0.0
 batch_size = 256
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 0.46165049332108
-noise_multiplicity = 71
+max_grad_norm = 0.9142315169657932
+noise_multiplicity = 32
 
 [train.T]
 seed = 0

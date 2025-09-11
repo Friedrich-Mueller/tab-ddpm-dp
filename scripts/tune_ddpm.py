@@ -43,7 +43,7 @@ def _suggest_mlp_layers(trial):
     def suggest_dim(name):
         t = trial.suggest_int(name, d_min, d_max)
         return 2 ** t
-    min_n_layers, max_n_layers, d_min, d_max = 1, 4, 7, 9
+    min_n_layers, max_n_layers, d_min, d_max = 1, 3, 7, 9
     n_layers = 2 * trial.suggest_int('n_layers', min_n_layers, max_n_layers)
     d_first = [suggest_dim('d_first')] if n_layers else []
     d_middle = (
@@ -72,13 +72,13 @@ def objective(trial):
 
     ### WILT dataset eps 9
 
-    # lr = trial.suggest_loguniform('lr', 0.001, 0.0065)
-    lr = trial.suggest_categorical('lr', [0.0047781567509498505])
-    # d_layers = _suggest_mlp_layers(trial)
+    lr = trial.suggest_loguniform('lr', 0.005, 0.009)
+    # lr = trial.suggest_categorical('lr', [0.0047781567509498505])
+    d_layers = _suggest_mlp_layers(trial)
     weight_decay = 0.0
     batch_size = trial.suggest_categorical('batch_size', [256])
-    # steps = trial.suggest_int("steps", 200, 800)
-    steps = trial.suggest_categorical('steps', [400]) # for debug
+    steps = trial.suggest_int("steps", 100, 400)
+    # steps = trial.suggest_categorical('steps', [400]) # for debug
     gaussian_loss_type = 'mse'
     # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
     num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
@@ -86,10 +86,10 @@ def objective(trial):
     if args.dp_eps or args.dp_noise:
         # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
         lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine']) # for debug
-        # max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.01, 7.0)
-        max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195]) # for debug
+        max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.3, 2)
+        # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
         # noise_multiplicity = trial.suggest_int("noise_multiplicity", 10, 150)
-        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [16]) # for debug
+        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [32, 64])
 
     base_config = lib.load_config(base_config_path)
 
@@ -101,7 +101,7 @@ def objective(trial):
     base_config['train']['main']['steps'] = steps
     base_config['train']['main']['batch_size'] = batch_size
     base_config['train']['main']['weight_decay'] = weight_decay
-    # base_config['model_params']['rtdl_params']['d_layers'] = d_layers
+    base_config['model_params']['rtdl_params']['d_layers'] = d_layers
     base_config['eval']['type']['eval_type'] = eval_type
     # base_config['sample']['num_samples'] = num_samples
     base_config['diffusion_params']['gaussian_loss_type'] = gaussian_loss_type
@@ -120,7 +120,7 @@ def objective(trial):
 
     subprocess.run(['python3.9', f'{pipeline}', '--config', f'{exps_path / "config.toml"}', *cmd_train_file_location.split(), '--change_val'], check=True)
 
-    n_datasets = 5
+    n_datasets = 10
     score = 0.0
 
     for sample_seed in range(n_datasets):
@@ -146,7 +146,7 @@ study = optuna.create_study(
     sampler=optuna.samplers.TPESampler(seed=0),
 )
 
-study.optimize(objective, n_trials=2, show_progress_bar=True)
+study.optimize(objective, n_trials=50, show_progress_bar=True)
 
 best_config_path = parent_path / f'{prefix}_best/config.toml'
 best_config = study.best_trial.user_attrs['config']
