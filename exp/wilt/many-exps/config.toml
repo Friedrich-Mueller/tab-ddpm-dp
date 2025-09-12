@@ -48,7 +48,7 @@ y_policy = "default"
 [sample]
 num_samples = 24800
 batch_size = 10000
-seed = 0
+seed = 9
 
 [eval.type]
 eval_model = "catboost"
