@@ -299,29 +299,6 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
 
         return terms['loss']
 
-    def _gaussian_loss_per_sample(self, model_out, x_start, x_t, t, noise, model_kwargs=None):
-        if model_kwargs is None:
-            model_kwargs = {}
-
-        terms = {}
-        if self.gaussian_loss_type == 'mse':
-            # Compute per-sample MSE loss
-            per_sample_loss = ((noise - model_out) ** 2).view(noise.shape[0], -1).mean(dim=1)
-            terms["loss"] = per_sample_loss  # Shape: [B]
-        elif self.gaussian_loss_type == 'kl':
-            # Compute per-sample KL loss (ensure _vb_terms_bpd supports this)
-            vb_terms = self._vb_terms_bpd(
-                model_output=model_out,
-                x_start=x_start,
-                x_t=x_t,
-                t=t,
-                clip_denoised=False,
-                model_kwargs=model_kwargs,
-            )
-            terms["loss"] = vb_terms["output"]  # Ensure vb_terms["output"] is [B]
-
-        return terms["loss"]  # Returns a vector of per-sample losses, shape [B]
-
     def _predict_xstart_from_eps(self, x_t, t, eps):
         assert x_t.shape == eps.shape
         return (
@@ -717,56 +694,6 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
 
         return loss_multi.mean(), loss_gauss.mean()
 
-    def mixed_loss_per_sample(self, x, out_dict):
-        b = x.shape[0]  # Batch size
-        device = x.device
-        t, pt = self.sample_time(b, device)  # Sample time steps for diffusion
-
-        # Separate numerical and categorical features
-        x_num = x[:, :self.num_numerical_features]
-        x_cat = x[:, self.num_numerical_features:]
-
-        # Process numerical features with Gaussian noise
-        x_num_t = x_num
-        log_x_cat_t = x_cat
-        if x_num.shape[1] > 0:
-            noise = torch.randn_like(x_num)  # Gaussian noise
-            x_num_t = self.gaussian_q_sample(x_num, t, noise=noise)
-        if x_cat.shape[1] > 0:
-            log_x_cat = index_to_log_onehot(x_cat.long(), self.num_classes)
-            log_x_cat_t = self.q_sample(log_x_start=log_x_cat, t=t)
-
-        x_in = torch.cat([x_num_t, log_x_cat_t], dim=1)
-
-        # Model predictions
-        model_out = self._denoise_fn(
-            x_in,
-            t,
-            **out_dict
-        )
-
-        # Separate numerical and categorical outputs
-        model_out_num = model_out[:, :self.num_numerical_features]
-        model_out_cat = model_out[:, self.num_numerical_features:]
-
-        # Initialize losses
-        loss_multi = torch.zeros(b).float().to(device)  # Per-sample multinomial loss
-        loss_gauss = torch.zeros(b).float().to(device)  # Per-sample Gaussian loss
-
-        # Compute multinomial loss for categorical data
-        if x_cat.shape[1] > 0:
-            loss_multi = self._multinomial_loss_per_sample(
-                model_out_cat, log_x_cat, log_x_cat_t, t, pt, out_dict
-            ) / len(self.num_classes)  # Per-sample, shape: (batch_size,)
-
-        # Compute Gaussian loss for numerical data
-        if x_num.shape[1] > 0:
-            loss_gauss = self._gaussian_loss_per_sample(
-                model_out_num, x_num, x_num_t, t, noise
-            )  # Per-sample, shape: (batch_size,)
-
-        # Return per-sample losses
-        return loss_multi, loss_gauss
 
     @torch.no_grad()
     def mixed_elbo(self, x0, out_dict):

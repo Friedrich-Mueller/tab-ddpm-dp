@@ -57,7 +57,9 @@ class Trainer:
         self.privacy_engine = PrivacyEngine(accountant="rdp")
         self.target_epsilon = epsilon
         self.max_grad_norm = max_grad_norm
-        epochs = steps / (dataset_len / self.batch_size)
+        epochs = steps / len(train_iter)
+        print("Epochs: ", epochs)
+
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,
             optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
@@ -219,7 +221,6 @@ def train_dp_eps(
     )
 
     dataset_len = len(dataset.X_num['train'])
-    epochs = steps / (dataset_len / batch_size)
     print("batch_size", batch_size)
     print("dataset len: ", dataset_len)
     print("Steps: ", steps)

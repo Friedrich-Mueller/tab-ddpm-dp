@@ -1,9 +1,12 @@
 {
-    "noise_multiplicity": 1.0,
-    "steps": 0.0,
+    "n_layers": 0.4179136435246828,
+    "steps": 0.2371374207617344,
+    "max_grad_norm": 0.16158347258372352,
+    "lr": 0.09791808576358552,
+    "noise_multiplicity": 0.043365573821141666,
+    "d_last": 0.030609223288525854,
+    "d_first": 0.011472580256606267,
     "num_timesteps": 0.0,
-    "max_grad_norm": 0.0,
     "lr_anneal": 0.0,
-    "lr": 0.0,
     "batch_size": 0.0
 }

@@ -666,7 +666,7 @@ def prepare_fast_dp_dataloader(
     dataset = FastTensorDataset(X, y)
 
     # Create a DataLoader (which is compatible with Opacus)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=(split == 'train'))
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=(split == 'train'), drop_last=True )
     return dataloader
 
 def prepare_fast_torch_dataloader(

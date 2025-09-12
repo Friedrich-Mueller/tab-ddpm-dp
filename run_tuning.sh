@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define a list of epsilon values to iterate through
-EPSILONS=(6 5 4 3 2 1)
+EPSILONS=(0.9 0.8 0.7)
 
 # Loop through each epsilon value
 for EPS in "${EPSILONS[@]}"

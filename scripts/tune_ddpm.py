@@ -77,7 +77,7 @@ def objective(trial):
     d_layers = _suggest_mlp_layers(trial)
     weight_decay = 0.0
     batch_size = trial.suggest_categorical('batch_size', [256])
-    steps = trial.suggest_int("steps", 100, 400)
+    steps = trial.suggest_int("steps", 200, 400)
     # steps = trial.suggest_categorical('steps', [400]) # for debug
     gaussian_loss_type = 'mse'
     # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
@@ -89,7 +89,7 @@ def objective(trial):
         max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.3, 2)
         # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
         # noise_multiplicity = trial.suggest_int("noise_multiplicity", 10, 150)
-        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [32, 64])
+        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [32, 48, 64, 96, 128])
 
     base_config = lib.load_config(base_config_path)
 
