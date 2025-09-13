@@ -1,5 +1,5 @@
 seed = 0
-parent_dir = "exp/wilt/wilt_dp_eps_1_best"
+parent_dir = "exp/wilt/wilt_dp_eps_0.8_best"
 real_data_path = "data/wilt/"
 model_type = "mlp"
 num_numerical_features = 5
@@ -12,7 +12,7 @@ is_y_cond = true
 [model_params.rtdl_params]
 d_layers = [
     512,
-    128,
+    256,
 ]
 dropout = 0.0
 
@@ -22,15 +22,15 @@ gaussian_loss_type = "mse"
 scheduler = "cosine"
 
 [train.main]
-steps = 300
-lr = 0.007384739533177836
+steps = 400
+lr = 0.005967303961099624
 weight_decay = 0.0
 batch_size = 256
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 0.6826932720883915
-noise_multiplicity = 128
+max_grad_norm = 0.4588922080593301
+noise_multiplicity = 32
 
 [train.T]
 seed = 0
@@ -44,7 +44,7 @@ y_policy = "default"
 [sample]
 num_samples = 24800
 batch_size = 10000
-seed = 4
+seed = 0
 
 [eval.type]
 eval_model = "catboost"

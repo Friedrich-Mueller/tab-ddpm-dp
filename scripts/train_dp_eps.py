@@ -132,7 +132,6 @@ class Trainer:
         curr_loss_multi = 0.0
         curr_loss_gauss = 0.0
         curr_count = 0
-        print(f"Training dataloader drop_last: {self.train_iter.drop_last}")
         while step < self.steps:
 
             # Get the next batch of data

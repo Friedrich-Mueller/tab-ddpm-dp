@@ -22,15 +22,15 @@ gaussian_loss_type = "mse"
 scheduler = "cosine"
 
 [train.main]
-steps = 300
-lr = 0.007384739533177836
+steps = 335
+lr = 0.007122466875559047
 weight_decay = 0.0
 batch_size = 256
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 0.6826932720883915
-noise_multiplicity = 128
+max_grad_norm = 1.5937988772254819
+noise_multiplicity = 64
 
 [train.T]
 seed = 0
@@ -44,7 +44,7 @@ y_policy = "default"
 [sample]
 num_samples = 24800
 batch_size = 10000
-seed = 4
+seed = 0
 
 [eval.type]
 eval_model = "catboost"
