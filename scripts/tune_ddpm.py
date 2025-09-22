@@ -43,8 +43,9 @@ def _suggest_mlp_layers(trial):
     def suggest_dim(name):
         t = trial.suggest_int(name, d_min, d_max)
         return 2 ** t
-    min_n_layers, max_n_layers, d_min, d_max = 2, 2, 6, 9
-    n_layers = trial.suggest_int('n_layers', min_n_layers, max_n_layers)
+    min_n_layers, max_n_layers, d_min, d_max = 2, 3, 7, 9 # dp wilt 0.847
+    # n_layers = trial.suggest_int('n_layers', min_n_layers, max_n_layers)
+    n_layers = 2
     d_first = [suggest_dim('d_first')] if n_layers else []
     d_middle = (
         [suggest_dim('d_middle')] * (n_layers - 2)
@@ -72,14 +73,17 @@ def objective(trial):
 
     ### WILT dataset eps 9
 
-    lr = trial.suggest_loguniform('lr', 0.004, 0.009)
-    # lr = trial.suggest_categorical('lr', [0.0047781567509498505])
-    d_layers = _suggest_mlp_layers(trial)
+    # lr = trial.suggest_loguniform('lr', 0.004, 0.007) # good for adult?
+    lr = trial.suggest_loguniform('lr', 0.0008, 0.0012)
+    # lr = trial.suggest_categorical('lr', [0.000847781567509498505])
+    # d_layers = _suggest_mlp_layers(trial)
+    d_layers = [512, 512]
+    # d_layers = trial.suggest_categorical('d_layers', [[512, 128], [1024, 128]])
     weight_decay = 0.0
-    # batch_size = trial.suggest_categorical('batch_size', [256])
     batch_size = trial.suggest_categorical('batch_size', [256])
-    steps = trial.suggest_int("steps", 300, 1000)
-    # steps = trial.suggest_categorical('steps', [300, 325, 1000])
+    # batch_size = trial.suggest_categorical('batch_size', [512])
+    # steps = trial.suggest_int("steps", 400, 1000)
+    steps = trial.suggest_categorical('steps', [1500])
     gaussian_loss_type = 'mse'
     # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
     num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
@@ -87,10 +91,55 @@ def objective(trial):
     if args.dp_eps or args.dp_noise:
         # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
         lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine']) # for debug
-        max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.1, 2)
+        max_grad_norm = trial.suggest_loguniform("max_grad_norm", 1.4, 1.5)
         # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
         # noise_multiplicity = trial.suggest_int("noise_multiplicity", 64, 150)
-        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [128])
+        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [64])
+
+    # # dp wilt eps 0.8 f1 0.847 - 10 samples, 200 trials
+    # lr = trial.suggest_loguniform('lr', 0.007, 0.010)
+    # # lr = trial.suggest_categorical('lr', [0.0047781567509498505])
+    # d_layers = _suggest_mlp_layers(trial)
+    # weight_decay = 0.0
+    # # batch_size = trial.suggest_categorical('batch_size', [256])
+    # batch_size = trial.suggest_categorical('batch_size', [256])
+    # # steps = trial.suggest_int("steps", 200, 400)
+    # steps = trial.suggest_categorical('steps', [200, 250, 300])
+    # gaussian_loss_type = 'mse'
+    # # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
+    # num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
+    # # num_samples = int(train_size * (2 ** trial.suggest_int('num_samples', -2, 1)))
+    # if args.dp_eps or args.dp_noise:
+    #     # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
+    #     lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine'])  # for debug
+    #     max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.1, 0.5)
+    #     # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
+    #     # noise_multiplicity = trial.suggest_int("noise_multiplicity", 64, 150)
+    #     noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [64])
+
+    # ## dp wilt eps 0.9 f1 0.XXX - 10 samples, 20 trials
+    # # lr = trial.suggest_loguniform('lr', 0.007, 0.009)
+    # lr = trial.suggest_float('lr', 0.007, 0.009)
+    # # lr = trial.suggest_categorical('lr', [0.0075])
+    # # d_layers = _suggest_mlp_layers(trial)
+    # d_layers = [512, 128]
+    # weight_decay = 0.0
+    # # batch_size = trial.suggest_categorical('batch_size', [256])
+    # batch_size = trial.suggest_categorical('batch_size', [256])
+    # # steps = trial.suggest_int("steps", 200, 400)
+    # steps = trial.suggest_categorical('steps', [300])
+    # gaussian_loss_type = 'mse'
+    # # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
+    # num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
+    # # num_samples = int(train_size * (2 ** trial.suggest_int('num_samples', -2, 1)))
+    # if args.dp_eps or args.dp_noise:
+    #     # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
+    #     lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine'])  # for debug
+    #     # max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.5, 0.7)
+    #     max_grad_norm = trial.suggest_float("max_grad_norm", 0.5, 0.7)
+    #     # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
+    #     # noise_multiplicity = trial.suggest_int("noise_multiplicity", 64, 150)
+    #     noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [64])
 
     base_config = lib.load_config(base_config_path)
 
@@ -147,7 +196,7 @@ study = optuna.create_study(
     sampler=optuna.samplers.TPESampler(seed=0),
 )
 
-study.optimize(objective, n_trials=150, show_progress_bar=True)
+study.optimize(objective, n_trials=3, show_progress_bar=True)
 
 best_config_path = parent_path / f'{prefix}_best/config.toml'
 best_config = study.best_trial.user_attrs['config']

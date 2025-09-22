@@ -58,6 +58,7 @@ class Trainer:
         self.target_epsilon = epsilon
         self.max_grad_norm = max_grad_norm
         epochs = steps / (dataset_len / self.batch_size)
+
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,
             optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
@@ -77,7 +78,6 @@ class Trainer:
         MAKE PRIVATE
         END
         """
-
 
     # linear decay
     def _anneal_lr_linear(self, step):
@@ -113,15 +113,11 @@ class Trainer:
             x, out_dict, per_sample=True, K=self.noise_multiplicity_K
         )
 
+        # print(loss_multi.mean(), loss_gauss.mean())
         loss_per_sample = loss_multi + loss_gauss
-        # --- logging value ---
-        # logged_loss = loss_per_sample.mean().item()  # <-- this is what you compare to non-DP loss
 
         self.optimizer.zero_grad()
 
-        # print("loss per sample:", loss_per_sample)
-        # print("loss per sample sum:", loss_per_sample.sum())
-        # print("loss per sample mean:", loss_per_sample.mean())
         loss_per_sample.sum().backward()
         self.optimizer.step()
 
@@ -132,12 +128,25 @@ class Trainer:
         curr_loss_multi = 0.0
         curr_loss_gauss = 0.0
         curr_count = 0
-        while step < self.steps:
 
-            # Get the next batch of data
-            i, data = next(enumerate(self.train_iter))
-            x, out_dict = data
-            out_dict = {'y': out_dict}
+        # Create the iterator once before the loop
+        train_iterator = iter(self.train_iter)
+
+        while step < self.steps:
+            # Get the next batch of data from the single iterator
+            try:
+                data = next(train_iterator)
+            except StopIteration:
+                # If the iterator is exhausted (end of an epoch),
+                # create a new one to start over.
+                train_iterator = iter(self.train_iter)
+                data = next(train_iterator)
+
+            # The data loader yields a tuple of tensors, for example:
+            x, y_tensor = data
+
+            # Create the dictionary as intended
+            out_dict = {'y': y_tensor.long()}
 
             # Run a training step (DP-SGD-safe, noise multiplicity)
             batch_loss_multi, batch_loss_gauss = self._run_step(x, out_dict)
@@ -255,6 +264,7 @@ def train_dp_eps(
     diffusion.to(device)
     diffusion.train()
 
+
     # train_loader = lib.prepare_beton_loader(dataset, split='train', batch_size=batch_size)
     # train_loader = lib.prepare_fast_dataloader(dataset, split='train', batch_size=batch_size)
     # train_loader = lib.prepare_dp_dataloader(dataset, split='train', batch_size=batch_size)
@@ -278,4 +288,7 @@ def train_dp_eps(
 
     trainer.loss_history.to_csv(os.path.join(parent_dir, 'loss.csv'), index=False)
     torch.save(diffusion._denoise_fn.state_dict(), os.path.join(parent_dir, 'model.pt'))
+    # state_dict = diffusion._denoise_fn.state_dict()
+    # clean_state_dict = {k.replace("_module.", ""): v for k, v in state_dict.items()}
+    # torch.save(clean_state_dict, os.path.join(parent_dir, 'model.pt'))
     torch.save(trainer.ema_model.state_dict(), os.path.join(parent_dir, 'model_ema.pt'))

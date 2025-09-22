@@ -2,25 +2,25 @@
     "synthetic": {
         "val": {
             "acc-count": 50.0,
-            "acc-mean": 0.9817,
-            "acc-std": 0.0024,
+            "acc-mean": 0.9771,
+            "acc-std": 0.0022,
             "f1-count": 50.0,
-            "f1-mean": 0.8998,
-            "f1-std": 0.0144,
+            "f1-mean": 0.888,
+            "f1-std": 0.0085,
             "roc_auc-count": 50.0,
-            "roc_auc-mean": 0.9857,
-            "roc_auc-std": 0.0053
+            "roc_auc-mean": 0.9459,
+            "roc_auc-std": 0.0177
         },
         "test": {
             "acc-count": 50.0,
-            "acc-mean": 0.9688,
-            "acc-std": 0.0029,
+            "acc-mean": 0.968,
+            "acc-std": 0.0044,
             "f1-count": 50.0,
-            "f1-mean": 0.8249,
-            "f1-std": 0.0187,
+            "f1-mean": 0.8416,
+            "f1-std": 0.0161,
             "roc_auc-count": 50.0,
-            "roc_auc-mean": 0.9707,
-            "roc_auc-std": 0.0056
+            "roc_auc-mean": 0.8577,
+            "roc_auc-std": 0.0191
         }
     }
 }

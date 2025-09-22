@@ -45,7 +45,7 @@ def make_dataset(
     if num_classes > 0:
         X_cat = {} if os.path.exists(os.path.join(data_path, 'X_cat_train.npy')) or not is_y_cond else None
         X_num = {} if os.path.exists(os.path.join(data_path, 'X_num_train.npy')) else None
-        y = {} 
+        y = {}
 
         for split in ['train', 'val', 'test']:
             X_num_t, X_cat_t, y_t = lib.read_pure_data(data_path, split)
@@ -85,5 +85,5 @@ def make_dataset(
 
     if change_val:
         D = lib.change_val(D)
-    
+
     return lib.transform_dataset(D, T, None)
