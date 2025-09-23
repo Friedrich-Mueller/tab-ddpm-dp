@@ -19,12 +19,9 @@ class Trainer:
         self.ema_model = deepcopy(diffusion._denoise_fn)
         for param in self.ema_model.parameters():
             param.detach_()
-        self.batch_size = batch_size
 
-        # self.train_iter = train_iter
         self.steps = steps
         self.init_lr = lr
-        # self.optimizer = torch.optim.AdamW(self.diffusion.parameters(), lr=lr, weight_decay=weight_decay)
         self.device = device
         self.loss_history = pd.DataFrame(columns=['step', 'mloss', 'gloss', 'loss'])
 
@@ -51,14 +48,11 @@ class Trainer:
         MAKE PRIVATE
         START
         """
-        # self.noise_multiplier = 0 # no privacy
-        # self.max_grad_norm = 1e6 # no privacy
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
         self.target_epsilon = epsilon
         self.max_grad_norm = max_grad_norm
-        epochs = steps / (dataset_len / self.batch_size)
-
+        epochs = steps / (dataset_len / batch_size)
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
             module=diffusion,
             optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
@@ -108,7 +102,7 @@ class Trainer:
         for k in out_dict:
             out_dict[k] = out_dict[k].long().to(x.device)
 
-        # Compute per-sample losses with multiplicity
+        # Compute per-sample losses with noise multiplicity
         loss_multi, loss_gauss = self.diffusion._module.mixed_loss_dp(
             x, out_dict, per_sample=True, K=self.noise_multiplicity_K
         )
@@ -117,7 +111,6 @@ class Trainer:
         loss_per_sample = loss_multi + loss_gauss
 
         self.optimizer.zero_grad()
-
         loss_per_sample.sum().backward()
         self.optimizer.step()
 
@@ -137,30 +130,21 @@ class Trainer:
             try:
                 data = next(train_iterator)
             except StopIteration:
-                # If the iterator is exhausted (end of an epoch),
-                # create a new one to start over.
                 train_iterator = iter(self.train_iter)
                 data = next(train_iterator)
 
-            # The data loader yields a tuple of tensors, for example:
             x, y_tensor = data
-
-            # Create the dictionary as intended
             out_dict = {'y': y_tensor.long()}
 
-            # Run a training step (DP-SGD-safe, noise multiplicity)
             batch_loss_multi, batch_loss_gauss = self._run_step(x, out_dict)
-            # batch_loss_multi, batch_loss_gauss, batch_logged_loss = self._run_step(x, out_dict)
-            # print(f"Step {step + 1} mean loss (comparable to non-DP): {batch_logged_loss}")
 
-            # Anneal learning rate as per your schedule
+            # Anneal learning rate as per schedule
             self._anneal_lr(step)
 
             # Update current batch statistics
             batch_size = len(x)
             curr_count += batch_size
 
-            # FIX: Remove .item() since _run_step already returns floats
             curr_loss_multi += batch_loss_multi * batch_size
             curr_loss_gauss += batch_loss_gauss * batch_size
 
@@ -171,22 +155,16 @@ class Trainer:
                 if (step + 1) % self.print_every == 0:
                     print(f'Step {(step + 1)}/{self.steps} MLoss: {mloss} GLoss: {gloss} Sum: {mloss + gloss}')
                 self.loss_history.loc[len(self.loss_history)] = [step + 1, mloss, gloss, mloss + gloss]
-
-                # Reset batch statistics
                 curr_count = 0
                 curr_loss_multi = 0.0
                 curr_loss_gauss = 0.0
 
-            # Update EMA model parameters
             update_ema(self.ema_model.parameters(), self.diffusion._denoise_fn.parameters())
 
             step += 1
-
-            # Privacy accounting
             if (step + 1) % self.print_every == 0:
                 epsilon = self.privacy_engine.accountant.get_epsilon(delta=self.delta)
                 print(f"Step {step + 1}: Privacy ε = {epsilon:.2f}, δ = {self.delta}")
-
 
 def train_dp_eps(
         epsilon,
@@ -264,7 +242,6 @@ def train_dp_eps(
     diffusion.to(device)
     diffusion.train()
 
-
     # train_loader = lib.prepare_beton_loader(dataset, split='train', batch_size=batch_size)
     # train_loader = lib.prepare_fast_dataloader(dataset, split='train', batch_size=batch_size)
     # train_loader = lib.prepare_dp_dataloader(dataset, split='train', batch_size=batch_size)
@@ -288,7 +265,4 @@ def train_dp_eps(
 
     trainer.loss_history.to_csv(os.path.join(parent_dir, 'loss.csv'), index=False)
     torch.save(diffusion._denoise_fn.state_dict(), os.path.join(parent_dir, 'model.pt'))
-    # state_dict = diffusion._denoise_fn.state_dict()
-    # clean_state_dict = {k.replace("_module.", ""): v for k, v in state_dict.items()}
-    # torch.save(clean_state_dict, os.path.join(parent_dir, 'model.pt'))
     torch.save(trainer.ema_model.state_dict(), os.path.join(parent_dir, 'model_ema.pt'))

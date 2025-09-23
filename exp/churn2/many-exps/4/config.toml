@@ -11,8 +11,8 @@ is_y_cond = true
 
 [model_params.rtdl_params]
 d_layers = [
-    512,
     256,
+    128,
 ]
 dropout = 0.0
 
@@ -21,15 +21,15 @@ num_timesteps = 1000
 gaussian_loss_type = "mse"
 
 [train.main]
-steps = 1649
-lr = 0.006916740521760878
+steps = 1665
+lr = 0.003990477832001701
 weight_decay = 0.0
 batch_size = 512
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 0.4838717499556091
-noise_multiplicity = 64
+max_grad_norm = 0.8252946374463779
+noise_multiplicity = 32
 
 [train.T]
 seed = 0
@@ -43,7 +43,7 @@ y_policy = "default"
 [sample]
 num_samples = 21600
 batch_size = 10000
-seed = 0
+seed = 4
 
 [eval.type]
 eval_model = "catboost"

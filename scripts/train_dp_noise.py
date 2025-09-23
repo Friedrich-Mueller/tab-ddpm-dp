@@ -13,16 +13,6 @@ import pandas as pd
 
 from opacus import PrivacyEngine
 
-def print_grad_stats(model, name="Before Opacus"):
-    grads = []
-    for param in model.parameters():
-        if param.grad is not None:
-            grads.append(param.grad.view(-1))  # Flatten gradients
-    if grads:
-        grads = torch.cat(grads)
-        print(f"[{name}] Gradients - Mean: {grads.mean().item():.6f}, Std: {grads.std().item():.6f}, Max: {grads.max().item():.6f}, Min: {grads.min().item():.6f}")
-
-
 class Trainer:
     def __init__(self, diffusion, train_iter, batch_size, noise_multiplier, max_grad_norm, noise_multiplicity, dataset_len, lr, lr_anneal, weight_decay, steps, device=torch.device('cuda:1')):
         # self.diffusion = diffusion
@@ -30,10 +20,8 @@ class Trainer:
         for param in self.ema_model.parameters():
             param.detach_()
 
-        # self.train_iter = train_iter
         self.steps = steps
         self.init_lr = lr
-        # self.optimizer = torch.optim.AdamW(self.diffusion.parameters(), lr=lr, weight_decay=weight_decay)
         self.device = device
         self.loss_history = pd.DataFrame(columns=['step', 'mloss', 'gloss', 'loss'])
 
@@ -60,22 +48,10 @@ class Trainer:
         MAKE PRIVATE
         START
         """
-        # self.noise_multiplier = 0 # no privacy
-        # self.max_grad_norm = 1e6 # no privacy
         print("Dataset size(len(train_iter)*batch size), dataset_len: ", len(train_iter)*batch_size, dataset_len)
         self.privacy_engine = PrivacyEngine(accountant="rdp")
         self.noise_multiplier = noise_multiplier
         self.max_grad_norm = max_grad_norm
-        # epochs = steps / (dataset_len / batch_size)
-        # self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private_with_epsilon(
-        #     module=diffusion,
-        #     optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
-        #     data_loader=train_iter,
-        #     target_delta=self.delta,
-        #     target_epsilon=self.target_epsilon,
-        #     epochs=epochs,
-        #     max_grad_norm=self.max_grad_norm,
-        # )
         self.diffusion, self.optimizer, self.train_iter = self.privacy_engine.make_private(
             module=diffusion,
             optimizer=torch.optim.AdamW(diffusion.parameters(), lr=lr, weight_decay=weight_decay),
@@ -93,7 +69,6 @@ class Trainer:
         MAKE PRIVATE
         END
         """
-
 
     # linear decay
     def _anneal_lr_linear(self, step):
@@ -122,78 +97,53 @@ class Trainer:
     def _run_step(self, x, out_dict):
         x = x.to(self.device)
         for k in out_dict:
-            out_dict[k] = out_dict[k].long().to(self.device)
+            out_dict[k] = out_dict[k].long().to(x.device)
+
+        # Compute per-sample losses with noise multiplicity
+        loss_multi, loss_gauss = self.diffusion._module.mixed_loss_dp(
+            x, out_dict, per_sample=True, K=self.noise_multiplicity_K
+        )
+
+        # print(loss_multi.mean(), loss_gauss.mean())
+        loss_per_sample = loss_multi + loss_gauss
+
         self.optimizer.zero_grad()
-
-        total_loss_multi = 0.0
-        total_loss_gauss = 0.0
-
-        ### Implementation of noise multiplicity with new noise drawn for each timestep
-        for i in range(self.noise_multiplicity_K):
-            # loss_multi, loss_gauss = self.diffusion.mixed_loss(x, out_dict)
-            loss_multi, loss_gauss = self.diffusion._module.mixed_loss(x, out_dict)
-            total_loss_multi += loss_multi
-            total_loss_gauss += loss_gauss
-        total_loss_multi = total_loss_multi / self.noise_multiplicity_K
-        total_loss_gauss = total_loss_gauss / self.noise_multiplicity_K
-        loss = total_loss_multi + total_loss_gauss
-        loss.backward()
-
-        ### Implementation of noise multiplicity with noise drawn once and reused for each timestep
-        # total_loss_multi, total_loss_gauss = self.diffusion._module.mixed_loss_stable(x, out_dict, self.noise_multiplicity_K)
-        # loss = total_loss_multi + total_loss_gauss
-        # loss.backward()
-
-
-        ### The following can be used to estimate gradient clipping magnitudes 'manually', so save a lot of tuning time
-        # per_sample_grad_norms = []
-        # for param in self.diffusion.parameters():
-        #     if hasattr(param, 'grad_sample'):
-        #         grad_sample = param.grad_sample.reshape(param.grad_sample.shape[0], -1)
-        #         norms = torch.norm(grad_sample, dim=1)
-        #         per_sample_grad_norms.append(norms)
-        #
-        # per_sample_grad_norms = torch.stack(per_sample_grad_norms, dim=1)
-        # total_per_sample_norms = torch.norm(per_sample_grad_norms, dim=1)
-        # clipping_ratio = (total_per_sample_norms > self.max_grad_norm).float().mean().item()
-        #
-        # print(f"[DEBUG] Clipping ratio: {clipping_ratio:.4f}")
-
-        ### Print raw gradients (before Opacus modifies them)
-        # print_grad_stats(self.diffusion._module, "Before Opacus")
-
+        loss_per_sample.sum().backward()
         self.optimizer.step()
 
-        ### Print gradients after Opacus has modified them
-        # print_grad_stats(self.diffusion._module, "After Opacus")
-
-        return total_loss_multi, total_loss_gauss
+        return loss_multi.mean().item(), loss_gauss.mean().item()#, logged_loss
 
     def run_loop(self):
         step = 0
         curr_loss_multi = 0.0
         curr_loss_gauss = 0.0
-
         curr_count = 0
+
+        # Create the iterator once before the loop
+        train_iterator = iter(self.train_iter)
+
         while step < self.steps:
+            # Get the next batch of data from the single iterator
+            try:
+                data = next(train_iterator)
+            except StopIteration:
+                train_iterator = iter(self.train_iter)
+                data = next(train_iterator)
 
-            # Get the next batch of data
-            # x, out_dict = next(self.train_iter)
-            i, data = next(enumerate(self.train_iter))
-            x, out_dict = data
+            x, y_tensor = data
+            out_dict = {'y': y_tensor.long()}
 
-            out_dict = {'y': out_dict}
-
-            # Run a training step
             batch_loss_multi, batch_loss_gauss = self._run_step(x, out_dict)
 
-            # Anneal learning rate as per your schedule
+            # Anneal learning rate as per schedule
             self._anneal_lr(step)
 
             # Update current batch statistics
-            curr_count += len(x)
-            curr_loss_multi += batch_loss_multi.item() * len(x)
-            curr_loss_gauss += batch_loss_gauss.item() * len(x)
+            batch_size = len(x)
+            curr_count += batch_size
+
+            curr_loss_multi += batch_loss_multi * batch_size
+            curr_loss_gauss += batch_loss_gauss * batch_size
 
             # Logging after every log_every steps
             if (step + 1) % self.log_every == 0:
@@ -209,12 +159,12 @@ class Trainer:
             update_ema(self.ema_model.parameters(), self.diffusion._denoise_fn.parameters())
 
             step += 1
-
-            epsilon = self.privacy_engine.get_epsilon(delta=self.delta)
-            # **Added: Print privacy statistics**
             if (step + 1) % self.print_every == 0:
                 epsilon = self.privacy_engine.accountant.get_epsilon(delta=self.delta)
                 print(f"Step {step + 1}: Privacy ε = {epsilon:.2f}, δ = {self.delta}")
+
+            ### Add early stopping when desired epsilon is reached
+            # epsilon = self.privacy_engine.get_epsilon(delta=self.delta)
 
 def train_dp_noise(
         noise_multiplier,
