@@ -114,7 +114,7 @@ This plot demonstrates the trade-off between privacy (noise level) and utility (
 Beware that this is a continuous-feature-only dataset, and different results are to be expected not only for other datasets, but presumably more importantly based on the amount and cardinality of categorical/discrete features. Even to the extent that converting categorical features to continuous features a priori might be more feasible than running DP-TabDDPM on mixed-type tabular data. TBD.
 
 <p align="center">
-  <img width="439" height="374" src="https://github.com/Friedrich-Mueller/tab-ddpm-dp/blob/main/wilt10-0.6.png">
+  <img width="439" height="374" src="./wilt10-0.6.png">
 </p>
 
 ### Examples - TabDDPM
