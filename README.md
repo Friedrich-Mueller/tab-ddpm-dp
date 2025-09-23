@@ -7,6 +7,8 @@ Features:
 
 ✅ Retains core functionality and architecture of the original TabDDPM
 
+✅ Utilizes Noise Multiplicity as proposed by [Tim Dockhorn et al](https://arxiv.org/abs/2210.09929) 
+
 ✅ Supports common DP accounting and hyperparameter tuning
 
 ✅ Useful for research in privacy-preserving machine learning and synthetic tabular data generation
@@ -24,7 +26,7 @@ For examples pointing out the additional differentially private options and how 
 
 
 ## Setup the environment
-The setup is done completely analogue to the original TabDDPM. All library version are the same.
+The setup is done completely analogue to the original TabDDPM. All library version are the same. (Including an old version of Opacus)
 1. Install [conda](https://docs.conda.io/en/latest/miniconda.html) (just to manage the env).
 2. Run the following commands
     ```bash
@@ -52,6 +54,8 @@ The setup is done completely analogue to the original TabDDPM. All library versi
 Please note that if you want to run the complete experiments from the [TabDDPM paper](https://arxiv.org/abs/2209.15421), such as different models (CTAB-GAN, CTAB-GAN-Plus, etc) which were used for benchmarking, you will want to use the original TabDDPM repository.
 
 DP-TabDDPM offers the complete TabDDPM Diffusion Model functionality and additionally the option to run it with the application of differential privacy via DP-SGD.
+
+Beware that training under DP increases runtimes significantly. Additionally, the runtime grows linearly with the of amount/value of Noise Multiplicity.
 
 ### Datasets
 
@@ -103,6 +107,12 @@ Note how the second example will train a model while maintaining a given target 
 
 (With the current config.toml in ../wilt_dp_eps_9_best a target $\epsilon$ = 9 results in $\sigma$ = 1.063232421875 and vice versa.)  
 
+#### Example Results on the wilt dataset:
+
+This plot demonstrates the trade-off between privacy (noise level) and utility (F1 Score) when using DP-TabDDPM on the wilt dataset. As the privacy budget ϵ decreases (moving to the left on the x-axis), the noise level required for DP-SGD increases, which in turn leads to a decrease in the model's F1 score.
+
+![DP-TabDDPM performance on the wilt dataset, a small size continuous features only dataset](https://github.com/Friedrich-Mueller/tab-ddpm-dp/blob/main/wilt10-0.6.png)
+
 ### Examples - TabDDPM
 
 <ins>Run TabDDPM tuning.</ins>   
@@ -133,5 +143,6 @@ python scripts/eval_seeds.py --config exp/churn2/ddpm_cb_best/config.toml 10 ddp
 
 
 --- 
+
 
 If you find any errors or run into problems, please don't hesitate reaching out to me.

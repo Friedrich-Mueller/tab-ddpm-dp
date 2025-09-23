@@ -1,4 +1,4 @@
-parent_dir = "exp/churn2/many-exps/4"
+parent_dir = "exp/churn2/many-exps/7"
 real_data_path = "data/churn2/"
 num_numerical_features = 7
 model_type = "mlp"
@@ -12,7 +12,7 @@ is_y_cond = true
 [model_params.rtdl_params]
 d_layers = [
     256,
-    128,
+    256,
 ]
 dropout = 0.0
 
@@ -21,14 +21,14 @@ num_timesteps = 1000
 gaussian_loss_type = "mse"
 
 [train.main]
-steps = 1665
-lr = 0.003990477832001701
+steps = 1794
+lr = 0.003834997308349441
 weight_decay = 0.0
 batch_size = 512
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 0.8252946374463779
+max_grad_norm = 0.5593166560214872
 noise_multiplicity = 32
 
 [train.T]
@@ -43,7 +43,7 @@ y_policy = "default"
 [sample]
 num_samples = 21600
 batch_size = 10000
-seed = 4
+seed = 0
 
 [eval.type]
 eval_model = "catboost"
