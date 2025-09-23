@@ -109,9 +109,13 @@ Note how the second example will train a model while maintaining a given target 
 
 #### Example Results on the wilt dataset:
 
-This plot demonstrates the trade-off between privacy (noise level) and utility (F1 Score) when using DP-TabDDPM on the wilt dataset. As the privacy budget ϵ decreases (moving to the left on the x-axis), the noise level required for DP-SGD increases, which in turn leads to a decrease in the model's F1 score.
+This plot demonstrates the trade-off between privacy (noise level) and utility (F1 Score) when using DP-TabDDPM on the wilt dataset. As the privacy budget $\epsilon$ decreases (moving to the right on the x-axis), the noise level $\sigma$ required for DP-SGD increases, which in turn leads to a decrease in the model's F1 score. 
 
-![DP-TabDDPM performance on the wilt dataset, a small size continuous features only dataset](https://github.com/Friedrich-Mueller/tab-ddpm-dp/blob/main/wilt10-0.6.png)
+Beware that this is a continuous-feature-only dataset, and different results are to be expected not only for other datasets, but presumably more importantly based on the amount and cardinality of categorical/discrete features. Even to the extent that converting categorical features to continuous features a priori might be more feasible than running DP-TabDDPM on mixed-type tabular data. TBD.
+
+<p align="center">
+  <img width="460" height="300" src="https://github.com/Friedrich-Mueller/tab-ddpm-dp/blob/main/wilt10-0.6.png">
+</p>
 
 ### Examples - TabDDPM
 
