@@ -111,11 +111,19 @@ Note how the second example will train a model while maintaining a given target 
 
 This plot demonstrates the trade-off between privacy (noise level) and utility (F1 Score) when using DP-TabDDPM on the wilt dataset. As the privacy budget $\epsilon$ decreases (moving to the right on the x-axis), the noise level $\sigma$ required for DP-SGD increases, which in turn leads to a decrease in the model's F1 score. 
 
-Beware that this is a continuous-feature-only dataset, and different results are to be expected not only for other datasets, but presumably more importantly based on the amount and cardinality of categorical/discrete features, even to the extent that converting categorical features to continuous features a priori might be more feasible than running DP-TabDDPM on mixed-type tabular data. TBD.
+Beware that this is a continuous-feature-only dataset, and different results are to be expected not only for other datasets, but presumably more importantly based on the amount and cardinality of categorical/discrete features, even to the extent that converting categorical features to continuous features a priori might be more feasible than running DP-TabDDPM on mixed-type tabular data. (See direcly below.)
 
 <p align="center">
-  <img width="439" height="374" src="./wilt10-0.6.png">
+  <img width="439" height="374" src="./images_readme/wilt10-0.6.png">
 </p>
+
+#### Example Results (churn2 embedded categoricals):
+
+<p align="center">
+  <img width="683" height="216" src="./images_readme/churn2_embedded.png">
+</p>
+
+
 
 ### Examples - TabDDPM
 

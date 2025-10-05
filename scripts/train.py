@@ -26,6 +26,8 @@ class Trainer:
         self.print_every = 500
         self.ema_every = 1000
 
+        print(f"lr: {self.init_lr}\n")
+
     def _anneal_lr(self, step):
         frac_done = step / self.steps
         lr = self.init_lr * (1 - frac_done)

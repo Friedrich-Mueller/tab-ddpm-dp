@@ -1,6 +1,6 @@
-parent_dir = "exp/churn2/many-exps/10"
-real_data_path = "data/churn2/"
-num_numerical_features = 7
+parent_dir = "exp/churn2cont/many-exps/3"
+real_data_path = "data/churn2cont/"
+num_numerical_features = 19
 model_type = "mlp"
 seed = 0
 device = "cuda:0"
@@ -11,6 +11,7 @@ is_y_cond = true
 
 [model_params.rtdl_params]
 d_layers = [
+    256,
     512,
     128,
 ]
@@ -21,14 +22,14 @@ num_timesteps = 1000
 gaussian_loss_type = "mse"
 
 [train.main]
-steps = 1391
-lr = 0.0038197579896969724
+steps = 820
+lr = 0.004957236684465528
 weight_decay = 0.0
 batch_size = 512
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 1.418703818614862
+max_grad_norm = 0.4334113642837
 noise_multiplicity = 64
 
 [train.T]

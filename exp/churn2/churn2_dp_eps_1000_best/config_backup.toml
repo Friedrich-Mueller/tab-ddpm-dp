@@ -1,4 +1,4 @@
-parent_dir = "exp/churn2/churn2_dp_eps_10_best"
+parent_dir = "exp/churn2/churn2_dp_eps_1000_best"
 real_data_path = "data/churn2/"
 num_numerical_features = 7
 model_type = "mlp"

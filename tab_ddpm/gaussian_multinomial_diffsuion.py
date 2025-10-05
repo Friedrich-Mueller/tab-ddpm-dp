@@ -605,7 +605,6 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         total_loss_gauss = torch.zeros(b, device=device)
 
         for i in range(K):
-            # --- sample time and noisy inputs ---
             t, pt = self.sample_time(b, device)
 
             x_num = x[:, :self.num_numerical_features]

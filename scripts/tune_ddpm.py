@@ -43,9 +43,9 @@ def _suggest_mlp_layers(trial):
     def suggest_dim(name):
         t = trial.suggest_int(name, d_min, d_max)
         return 2 ** t
-    min_n_layers, max_n_layers, d_min, d_max = 2, 4, 7, 9 # dp wilt 0.847
-    # n_layers = trial.suggest_int('n_layers', min_n_layers, max_n_layers)
-    n_layers = 2
+    min_n_layers, max_n_layers, d_min, d_max = 2, 3, 7, 9 # dp wilt 0.847
+    n_layers = trial.suggest_int('n_layers', min_n_layers, max_n_layers)
+    # n_layers = 2
     d_first = [suggest_dim('d_first')] if n_layers else []
     d_middle = (
         [suggest_dim('d_middle')] * (n_layers - 2)
@@ -71,10 +71,32 @@ def objective(trial):
     # num_timesteps = trial.suggest_categorical('num_timesteps', [100, 1000])
     # num_samples = int(train_size * (2 ** trial.suggest_int('num_samples', -2, 1)))
 
-    ### WILT dataset eps 9
+    ### churn2cont search space eps10
+    # # lr = trial.suggest_loguniform('lr', 0.0035, 0.006)
+    # lr = trial.suggest_float('lr', 0.004, 0.006)
+    # # lr = trial.suggest_categorical('lr', [0.000847781567509498505])
+    # d_layers = _suggest_mlp_layers(trial)
+    # # d_layers = [512, 512]
+    # # d_layers = trial.suggest_categorical('d_layers', [[512, 128], [1024, 128]])
+    # weight_decay = 0.0
+    # batch_size = trial.suggest_categorical('batch_size', [512])
+    # # batch_size = trial.suggest_categorical('batch_size', [512])
+    # steps = trial.suggest_int("steps", 350, 550)
+    # # steps = trial.suggest_categorical('steps', [300])
+    # gaussian_loss_type = 'mse'
+    # # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
+    # num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
+    # # num_samples = int(train_size * (2 ** trial.suggest_int('num_samples', -2, 1)))
+    # if args.dp_eps or args.dp_noise:
+    #     # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
+    #     lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine']) # for debug
+    #     max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.4, 0.65)
+    #     # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
+    #     # noise_multiplicity = trial.suggest_int("noise_multiplicity", 64, 150)
+    #     noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [64])
 
-    # lr = trial.suggest_loguniform('lr', 0.004, 0.007) # good for adult?
-    lr = trial.suggest_loguniform('lr', 0.0035, 0.0045)
+    # lr = trial.suggest_loguniform('lr', 0.0035, 0.006)
+    lr = trial.suggest_float('lr', 0.003, 0.005)
     # lr = trial.suggest_categorical('lr', [0.000847781567509498505])
     d_layers = _suggest_mlp_layers(trial)
     # d_layers = [512, 512]
@@ -82,8 +104,8 @@ def objective(trial):
     weight_decay = 0.0
     batch_size = trial.suggest_categorical('batch_size', [512])
     # batch_size = trial.suggest_categorical('batch_size', [512])
-    steps = trial.suggest_int("steps", 1200, 1800)
-    # steps = trial.suggest_categorical('steps', [1300, 1500, 1700])
+    steps = trial.suggest_int("steps", 500, 1000)
+    # steps = trial.suggest_categorical('steps', [300])
     gaussian_loss_type = 'mse'
     # scheduler = trial.suggest_categorical('scheduler', ['cosine', 'linear'])
     num_timesteps = trial.suggest_categorical('num_timesteps', [1000])
@@ -91,10 +113,10 @@ def objective(trial):
     if args.dp_eps or args.dp_noise:
         # lr_anneal = trial.suggest_categorical('lr_anneal', ['none', 'linear', 'cosine', 'flat_then_decay'])
         lr_anneal = trial.suggest_categorical('lr_anneal', ['cosine']) # for debug
-        max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.5, 1.5)
+        max_grad_norm = trial.suggest_loguniform("max_grad_norm", 0.4, 0.7)
         # max_grad_norm = trial.suggest_categorical("max_grad_norm", [0.58700121482468195])
         # noise_multiplicity = trial.suggest_int("noise_multiplicity", 64, 150)
-        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [32, 64])
+        noise_multiplicity = trial.suggest_categorical("noise_multiplicity", [64])
 
     # # dp wilt eps 0.8 f1 0.847 - 10 samples, 200 trials
     # lr = trial.suggest_loguniform('lr', 0.007, 0.010)

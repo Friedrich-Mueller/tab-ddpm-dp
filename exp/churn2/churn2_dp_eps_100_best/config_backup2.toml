@@ -21,15 +21,15 @@ num_timesteps = 1000
 gaussian_loss_type = "mse"
 
 [train.main]
-steps = 995
-lr = 0.0036308567018483676
+steps = 1528
+lr = 0.0036984045081422823
 weight_decay = 0.0
 batch_size = 512
 
 [train.dp]
 lr_anneal = "cosine"
-max_grad_norm = 0.42350716575996633
-noise_multiplicity = 64
+max_grad_norm = 1.1589493421466057
+noise_multiplicity = 32
 
 [train.T]
 seed = 0
