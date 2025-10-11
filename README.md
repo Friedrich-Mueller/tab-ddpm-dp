@@ -22,7 +22,25 @@ Features:
 
 [//]: # (You can view all the results and build your own tables with this [notebook]&#40;notebooks/Reports.ipynb&#41;. -->)
 
-For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/Friedrich-Mueller/tab-ddpm-dp?tab=readme-ov-file#examples-dp-tabddpm) 
+For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/Friedrich-Mueller/tab-ddpm-dp?tab=readme-ov-file#examples-dp-tabddpm)
+
+## Table of Contents
+
+- [Setup the environment](#setup-the-environment)
+- [Running the experiments](#running-the-experiments)
+  - [Datasets](#datasets)
+  - [File structure](#file-structure)
+  - [Examples - DP-TabDDPM](#examples---dp-tabddpm)
+    - [Run DP-TabDDPM tuning](#run-dp-tabddpm-tuning)
+    - [Run DP-TabDDPM pipeline](#run-dp-tabddpm-pipeline)
+    - [Example Results (wilt dataset)](#example-results-wilt-dataset)
+    - [Example Results (churn2 embedded categoricals)](#example-results-churn2-embedded-categoricals)
+  - [Examples - TabDDPM](#examples---tabddpm)
+    - [Run TabDDPM tuning](#run-tabddpm-tuning)
+    - [Run TabDDPM pipeline](#run-tabddpm-pipeline)
+    - [Run evaluation over seeds](#run-evaluation-over-seeds)
+- [Contact / Troubleshooting](#contact-/-troubleshooting)
+
 
 
 ## Setup the environment
@@ -74,10 +92,10 @@ tar -xvf data.tar
 
 For the file structure, please refer to the [original repo](https://github.com/yandex-research/tab-ddpm?tab=readme-ov-file#file-structure)
 
-### Examples DP-TabDDPM
+### Examples - DP-TabDDPM
 
 
-<ins>Run DP-TabDDPM tuning.</ins>   
+<ins>Run DP-TabDDPM tuning</ins>   
 
 Either `--dp_eps [Int|Float]` or `--dp_noise [Int|Float]` is required.
 
@@ -91,7 +109,7 @@ python scripts/tune_ddpm.py wilt 3096 synthetic catboost wilt_dp_eps_9 --eval_se
 Note how the first example will tune a model while maintaining differential privacy with given target epsilon (here $\epsilon$ = 9).<br>
 Note how the second example will tune a model while maintaining a given target noise injection (here $\sigma$ = 1.063232421875).
 
-<ins>Run DP-TabDDPM pipeline.</ins>   
+<ins>Run DP-TabDDPM pipeline</ins>   
 
 Either `--train_dp_eps [Int|Float]` or `--train_dp_noise [Int|Float]` is required.
 
@@ -127,7 +145,7 @@ Beware that this is a continuous-feature-only dataset, and different results are
 
 ### Examples - TabDDPM
 
-<ins>Run TabDDPM tuning.</ins>   
+<ins>Run TabDDPM tuning</ins>   
 
 Template and examples (`--eval_seeds` is optional): 
 ```bash
@@ -136,7 +154,7 @@ python scripts/tune_ddpm.py churn2 6500 synthetic catboost ddpm_tune --eval_seed
 ```
 
 
-<ins>Run TabDDPM pipeline.</ins>   
+<ins>Run TabDDPM pipeline</ins>   
 
 Template and examples (`--train`, `--sample`, `--eval` are optional): 
 ```bash
@@ -156,5 +174,5 @@ python scripts/eval_seeds.py --config exp/churn2/ddpm_cb_best/config.toml 10 ddp
 
 --- 
 
-
+### Contact / Troubleshooting
 If you find any errors or run into problems, please don't hesitate reaching out to me.
