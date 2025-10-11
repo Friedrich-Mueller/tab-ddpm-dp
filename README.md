@@ -39,7 +39,7 @@ For examples pointing out the additional differentially private options and how 
     - [Run TabDDPM tuning](#run-tabddpm-tuning)
     - [Run TabDDPM pipeline](#run-tabddpm-pipeline)
     - [Run evaluation over seeds](#run-evaluation-over-seeds)
-- [Contact / Troubleshooting](#contact-/-troubleshooting)
+- [Contact / Troubleshooting](#Contact--Troubleshooting)
 
 
 
@@ -73,7 +73,7 @@ Please note that if you want to run the complete experiments from the [TabDDPM p
 
 DP-TabDDPM offers the complete TabDDPM Diffusion Model functionality and additionally the option to run it with the application of differential privacy via DP-SGD.
 
-Beware that training under DP increases runtimes significantly. Additionally, the runtime grows linearly with the of amount/value of Noise Multiplicity.
+Beware that training under DP increases runtimes significantly. Additionally, the runtime grows linearly with the amount/value of Noise Multiplicity.
 
 ### Datasets
 
@@ -94,8 +94,8 @@ For the file structure, please refer to the [original repo](https://github.com/y
 
 ### Examples - DP-TabDDPM
 
-
-<ins>Run DP-TabDDPM tuning</ins>   
+<a id="run-dp-tabddpm-tuning"></a>
+#### <ins>Run DP-TabDDPM tuning</ins>   
 
 Either `--dp_eps [Int|Float]` or `--dp_noise [Int|Float]` is required.
 
@@ -109,7 +109,8 @@ python scripts/tune_ddpm.py wilt 3096 synthetic catboost wilt_dp_eps_9 --eval_se
 Note how the first example will tune a model while maintaining differential privacy with given target epsilon (here $\epsilon$ = 9).<br>
 Note how the second example will tune a model while maintaining a given target noise injection (here $\sigma$ = 1.063232421875).
 
-<ins>Run DP-TabDDPM pipeline</ins>   
+<a id="run-dp-tabddpm-pipeline"></a>
+#### <ins>Run DP-TabDDPM pipeline</ins>   
 
 Either `--train_dp_eps [Int|Float]` or `--train_dp_noise [Int|Float]` is required.
 
@@ -145,7 +146,7 @@ Beware that this is a continuous-feature-only dataset, and different results are
 
 ### Examples - TabDDPM
 
-<ins>Run TabDDPM tuning</ins>   
+#### <ins>Run TabDDPM tuning</ins>   
 
 Template and examples (`--eval_seeds` is optional): 
 ```bash
@@ -154,7 +155,7 @@ python scripts/tune_ddpm.py churn2 6500 synthetic catboost ddpm_tune --eval_seed
 ```
 
 
-<ins>Run TabDDPM pipeline</ins>   
+#### <ins>Run TabDDPM pipeline</ins>   
 
 Template and examples (`--train`, `--sample`, `--eval` are optional): 
 ```bash
@@ -162,7 +163,7 @@ python scripts/pipeline.py --config [path_to_your_config] --train --sample --eva
 python scripts/pipeline.py --config exp/churn2/ddpm_cb_best/config.toml --train --sample
 ```
 
-<ins>Run evaluation over seeds</ins>   
+#### <ins>Run evaluation over seeds</ins>   
 Before running evaluation, you have to train the model with the given hyperparameters (the example above).  
 
 Template and example: 
@@ -171,8 +172,20 @@ python scripts/eval_seeds.py --config [path_to_your_config] [n_eval_seeds] [ddpm
 python scripts/eval_seeds.py --config exp/churn2/ddpm_cb_best/config.toml 10 ddpm synthetic catboost 5
 ```
 
+## Changes made compared to the [TabDDPM](https://github.com/rotot0/tab-ddpm) repository
 
+- Added `train_dp_eps.py` and `train_dp_noise.py`, implementing the respective Opacus methods for training with Differential Privacy (DP-SGD).
+  - Within these scripts:
+    - Replaced `mixed_loss` with `mixed_loss_dp`, enabling per-sample loss calculation and noise multiplicity.
+    - Replaced the custom dataloader `prepare_fast_dataloader` with `prepare_fast_dp_dataloader` to ensure compatibility with Opacus' `PrivacyEngine`.
+    - Added several learning rate annealing options.
+- Extended `pipeline.py` to support running `train_dp_eps.py` and `train_dp_noise.py`.
+- Extended `tune_ddpm.py` to support running `train_dp_eps.py` and `train_dp_noise.py`.
+- When running DP experiments, configuration files now require a `[train.dp]` subsection containing parameters for:
+  - Learning rate annealing
+  - Gradient clipping
+  - Noise multiplicity
 --- 
 
-### Contact / Troubleshooting
+## Contact / Troubleshooting
 If you find any errors or run into problems, please don't hesitate reaching out to me.
