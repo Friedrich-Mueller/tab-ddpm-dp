@@ -39,7 +39,8 @@ For examples pointing out the additional differentially private options and how 
     - [Run TabDDPM tuning](#run-tabddpm-tuning)
     - [Run TabDDPM pipeline](#run-tabddpm-pipeline)
     - [Run evaluation over seeds](#run-evaluation-over-seeds)
-- [Contact / Troubleshooting](#Contact--Troubleshooting)
+- [Changes made compared to the TabDDPM repository](#changes-made-compared-to-the-tabddpm-repository)
+- [Contact / Troubleshooting](#contact--troubleshooting)
 
 
 
@@ -184,7 +185,7 @@ python scripts/eval_seeds.py --config exp/churn2/ddpm_cb_best/config.toml 10 ddp
 - When running DP experiments, configuration files now require a `[train.dp]` subsection containing parameters for:
   - Learning rate annealing
   - Gradient clipping
-  - Noise multiplicity
+  - Noise multiplicity`
 --- 
 
 ## Contact / Troubleshooting
