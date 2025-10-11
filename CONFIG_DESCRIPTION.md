@@ -10,6 +10,12 @@ Main part:
 - `model_type = "mlp"` -- model type that approximates the reverse process
 - `num_numerical_features ` -- a number of numerical features in dataset
 - `device = "cuda:0"`
+- 
+DP part:
+- `lr_anneal = "cosine"` -- choice of lr annealing, usually cosine for DP
+- `max_grad_norm = 0.4` -- gradient clipping norm
+- `noise_multiplicity = 32` -- amount of per sample noised images processed and averaged in a single step
+
 
 Model params:
 - `is_y_cond` -- false for regression, true for classification
@@ -47,6 +53,11 @@ steps = 1000
 lr = 0.001
 weight_decay = 1e-05
 batch_size = 4096
+
+[train.dp]
+lr_anneal = "cosine"
+max_grad_norm = 0.4
+noise_multiplicity = 32
 
 [train.T]
 seed = 0
