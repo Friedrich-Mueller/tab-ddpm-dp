@@ -22,7 +22,7 @@ Features:
 
 [//]: # (You can view all the results and build your own tables with this [notebook]&#40;notebooks/Reports.ipynb&#41;. -->)
 
-For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/Friedrich-Mueller/tab-ddpm-dp?tab=readme-ov-file#examples-dp-tabddpm)
+For examples pointing out the additional differentially private options and how they are executed, jump to [Examples - DP-TabDDPM](https://github.com/Friedrich-Mueller/tab-ddpm-dp?tab=readme-ov-file#examples---dp-tabddpm)
 
 ## Table of Contents
 
@@ -185,7 +185,7 @@ python scripts/eval_seeds.py --config exp/churn2/ddpm_cb_best/config.toml 10 ddp
 - When running DP experiments, configuration files now require a `[train.dp]` subsection containing parameters for:
   - Learning rate annealing
   - Gradient clipping
-  - Noise multiplicity`
+  - Noise multiplicity
 --- 
 
 ## Contact / Troubleshooting
