@@ -3,6 +3,7 @@
 catboost_info/
 **/**.pt
 **/**.ipynb
+.ipynb_checkpoints/
 #!agg_results.ipynb
 **/**.npy
 #**/**.gz
