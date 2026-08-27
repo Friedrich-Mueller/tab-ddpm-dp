@@ -144,7 +144,7 @@ The utility of the synthetic Wilt data is quite good compared to the original da
 
 Shown here are the results of the Churn Modeling dataset, consisting of 7 continuous and 4 categorical features.
 
-The first column of the table shows that the vanilla model performs equally well on all three representations of the data—that is, on the original mixed-type data as well as on the two types of embeddings.
+The first column of the table shows that the vanilla model performs equally well on all three representations of the data — that is, on the original mixed-type data as well as on the two types of embeddings.
 
 The first row illustrates how the fidelity and utility of the mixed-type representation already break down at epsilons of 1000 and 100, respectively.
 
