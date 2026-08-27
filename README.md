@@ -3,15 +3,15 @@ This repository is a modified implementation of [TabDDPM](https://github.com/yan
 
 Features:
 
-✅ Full integration of DP-SGD for differentially private training
+- Full integration of DP-SGD for differentially private training
 
-✅ Retains core functionality and architecture of the original TabDDPM
+- Retains core functionality and architecture of the original TabDDPM
 
-✅ Utilizes Noise Multiplicity as proposed by [Tim Dockhorn et al](https://arxiv.org/abs/2210.09929) 
+- Utilizes Noise Multiplicity as proposed by [Tim Dockhorn et al](https://arxiv.org/abs/2210.09929) 
 
-✅ Supports common DP accounting and hyperparameter tuning
+- Supports common DP accounting and hyperparameter tuning
 
-✅ Useful for research in privacy-preserving machine learning and synthetic tabular data generation
+- Useful for research in privacy-preserving machine learning and synthetic tabular data generation
 
 
 [//]: # ()
