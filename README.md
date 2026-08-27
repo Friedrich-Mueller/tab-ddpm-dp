@@ -80,7 +80,7 @@ Beware that training under DP increases runtimes significantly. Additionally, th
 
 Nothing changed here. You can download their datasets and run them just as you could with TabDDPM. This is advisable at the very least to see how the data has to be prepared to be used with TabDDPM.
 
-You could load the datasets with the following commands:
+You can load the datasets with the following commands:
 
 ``` bash
 conda activate tddpm-dp
@@ -129,18 +129,33 @@ Note how the second example will train a model while maintaining a given target 
 
 #### Example Results (wilt dataset):
 
-This plot demonstrates the trade-off between privacy (noise level) and utility (F1 Score) when using DP-TabDDPM on the wilt dataset. As the privacy budget $\epsilon$ decreases (moving to the right on the x-axis), the noise level $\sigma$ required for DP-SGD increases, which in turn leads to a decrease in the model's F1 score. 
+Here we see the results of the utility analysis for the Wilt dataset, which consists exclusively of continuous features, measured using the utility measure, a generic Catboost classifier.
 
-Beware that this is a continuous-feature-only dataset, and different results are to be expected not only for other datasets, but presumably more importantly based on the amount and cardinality of categorical/discrete features, even to the extent that converting categorical features to continuous features a priori might be more feasible than running DP-TabDDPM on mixed-type tabular data. (See direcly below.)
+The utility remains strong up to an epsilon of approximately 1, with an F1 score of 0.87.
 
+Below an epsilon of 1, the utility drops sharply, accompanied by increasing noise.
+
+The utility of the synthetic Wilt data is quite good compared to the original data, which reaches a baseline F1 score of approximately 0.9.
 <p align="center">
-  <img width="439" height="374" src="./images_readme/wilt10-0.6.png">
+  <img width="439" height="374" src="./imgs/wilt10-0.6.png">
 </p>
 
 #### Example Results (churn2 embedded categoricals):
 
+Shown here are the results of the Churn Modeling dataset, consisting of 7 continuous and 4 categorical features.
+
+The first column of the table shows that the vanilla model performs equally well on all three representations of the data—that is, on the original mixed-type data as well as on the two types of embeddings.
+
+The first row illustrates how the fidelity and utility of the mixed-type representation already break down at epsilons of 1000 and 100, respectively.
+
+As seen in the second row, the categorical embeddings significantly improve robustness.
+
+This suggests that under DP it is more optimal to accept some information loss due to naive embeddings than to attempt to work with heterogeneous features.
+
+And as you can see in the bottom row, a full Latent Space Representation achieves even better results with an F1 score of 0.57 at an epsilon of 5. That's only a 22% loss of utility.
+
 <p align="center">
-  <img width="683" height="216" src="./images_readme/churn2_embedded.png">
+  <img width="683" height="216" src="./imgs/churn2_embeddings_results.png">
 </p>
 
 
