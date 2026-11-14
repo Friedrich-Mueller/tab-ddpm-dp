@@ -1,0 +1,26 @@
+{
+    "synthetic": {
+        "val": {
+            "acc-count": 50.0,
+            "acc-mean": 0.8276,
+            "acc-std": 0.0046,
+            "f1-count": 50.0,
+            "f1-mean": 0.6973,
+            "f1-std": 0.0086,
+            "roc_auc-count": 50.0,
+            "roc_auc-mean": 0.7818,
+            "roc_auc-std": 0.0085
+        },
+        "test": {
+            "acc-count": 50.0,
+            "acc-mean": 0.8147,
+            "acc-std": 0.0048,
+            "f1-count": 50.0,
+            "f1-mean": 0.682,
+            "f1-std": 0.0071,
+            "roc_auc-count": 50.0,
+            "roc_auc-mean": 0.7864,
+            "roc_auc-std": 0.0071
+        }
+    }
+}
