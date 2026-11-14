@@ -140,7 +140,10 @@ The utility of the synthetic Wilt data is quite good compared to the original da
   <img width="439" height="374" src="./imgs/wilt10-0.6.png">
 </p>
 
-#### Example Results (churn2 embedded categoricals):
+#### Example Results:
+- Vanilla (Mixed-Type)
+- churn2 embedded categoricals
+- churn2 latent space representations
 
 Shown here are the results of the Churn Modeling dataset, consisting of 7 continuous and 4 categorical features.
 
@@ -152,12 +155,26 @@ As seen in the second row, the categorical embeddings significantly improve robu
 
 This suggests that under DP it is more optimal to accept some information loss due to naive embeddings than to attempt to work with heterogeneous features.
 
-And as you can see in the bottom row, a full Latent Space Representation achieves even better results with an F1 score of 0.57 at an epsilon of 5. That's only a 22% loss of utility.
+And as can be seen in the bottom row, a full Latent Space Representation achieves even better results with an F1 score of 0.57 at an epsilon of 5. That's only a 22% loss of utility.
 
 <p align="center">
   <img width="683" height="216" src="./imgs/churn2_embeddings_results.png">
 </p>
 
+The respective models are trained with the following commands:
+
+```bash
+python scripts/pipeline.py --config exp/<data>/<data>_dp_eps_<eps>_best/config.toml --train_dp_eps <eps> --sample --eval
+```
+- \<data>: churn2, churn2cont, churn2lat 
+- \<eps>: 1000, 100, 10, 5
+
+E.g.:
+```bash
+python scripts/pipeline.py --config exp/churn2lat/churn2lat_dp_eps_5_best/config.toml --train_dp_eps 5 --sample --eval
+```
+
+For the vanilla versions see below (Examples - TabDDPM)
 
 
 ### Examples - TabDDPM
@@ -169,6 +186,7 @@ Template and examples (`--eval_seeds` is optional):
 python scripts/tune_ddpm.py [ds_name] [train_size] synthetic [catboost|mlp] [exp_name] --eval_seeds
 python scripts/tune_ddpm.py churn2 6500 synthetic catboost ddpm_tune --eval_seeds
 ```
+
 
 
 #### <ins>Run TabDDPM pipeline</ins>   
